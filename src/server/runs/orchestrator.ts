@@ -58,7 +58,7 @@ export async function runDeterministicPipeline(
   // Reproduction in a PatchBench-owned detached worktree.
   r = await to("REPRODUCING");
   if (!r.ok) return r;
-  const ws = await worktrees.createReproduction({ repoRoot, runId, baseSha: run.repository.commitSha });
+  const ws = await worktrees.createWorkspace({ repoRoot, runId, baseSha: run.repository.commitSha, kind: "reproduction" });
   if (!ws.ok) return to("FAILED", ws.error);
   r = await runReproductionGate({ store, bob, clock }, { runId, workspace: ws.value.path, primaryRoot: repoRoot, signal: input.signal });
   if (!r.ok || r.value.status !== "STRATEGIZING") return r;

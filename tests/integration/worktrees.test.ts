@@ -57,18 +57,44 @@ describe("GitWorktreeManager", () => {
   });
 
   it("creates a detached, branchless reproduction workspace", async () => {
-    const ws = unwrap(await manager.createReproduction({ repoRoot: primary, runId: RUN, baseSha: sha }));
+    const ws = unwrap(await manager.createWorkspace({ repoRoot: primary, runId: RUN, baseSha: sha, kind: "reproduction" }));
     expect(ws.path).toBe(reproductionWorkspacePath(runtime, RUN));
     expect(git(ws.path, "rev-parse", "HEAD")).toBe(sha);
     expect(git(ws.path, "rev-parse", "--abbrev-ref", "HEAD")).toBe("HEAD");
     expect(branches()).toEqual(["main"]);
     expect(unwrap(await manager.list(primary, RUN))).toEqual([]);
-    unwrap(await manager.removeReproduction(ws, primary));
+    unwrap(await manager.removeWorkspace(ws, primary));
     expect(await exists(ws.path)).toBe(false);
   });
 
+  it("creates a detached baseline workspace at the run's commit, separate from reproduction", async () => {
+    await writeFile(path.join(primary, "src", "app.ts"), "// dirty primary edit\n");
+    const base = unwrap(await manager.createWorkspace({ repoRoot: primary, runId: RUN, baseSha: sha, kind: "baseline" }));
+    const repro = unwrap(await manager.createWorkspace({ repoRoot: primary, runId: RUN, baseSha: sha, kind: "reproduction" }));
+    expect(base.path).toBe(path.join(runtime, "worktrees", RUN, "baseline"));
+    expect(base.path).not.toBe(repro.path);
+    expect(git(base.path, "rev-parse", "HEAD")).toBe(sha);
+    expect(git(base.path, "rev-parse", "--abbrev-ref", "HEAD")).toBe("HEAD");
+    // Uncommitted primary edits never reach the baseline workspace.
+    expect(git(base.path, "status", "--porcelain")).toBe("");
+    expect(await treeFingerprint(base.path)).not.toHaveProperty("src/app.ts", (await treeFingerprint(primary))["src/app.ts"]);
+    expect(branches()).toEqual(["main"]);
+    const again = await manager.createWorkspace({ repoRoot: primary, runId: RUN, baseSha: sha, kind: "baseline" });
+    expect(again.ok).toBe(false);
+  });
+
+  it("keeps baseSha as the creation SHA even after the worktree HEAD moves", async () => {
+    const a = unwrap(await manager.create({ repoRoot: primary, runId: RUN, candidateId: "a", baseSha: sha }));
+    await writeFile(path.join(a.path, "src", "app.ts"), "// candidate commit\n");
+    git(a.path, "commit", "-q", "-am", "candidate change");
+    const head = git(a.path, "rev-parse", "HEAD");
+    expect(head).not.toBe(sha);
+    const listed = unwrap(await manager.list(primary, RUN));
+    expect(listed).toEqual([{ ...a, baseSha: sha }]);
+  });
+
   it("refuses unsafe, reserved or duplicate ids and existing targets", async () => {
-    for (const candidateId of ["..", "A", "reproduction", "a/b"]) {
+    for (const candidateId of ["..", "A", "reproduction", "baseline", "a/b"]) {
       const r = await manager.create({ repoRoot: primary, runId: RUN, candidateId, baseSha: sha });
       expect(r.ok, candidateId).toBe(false);
     }

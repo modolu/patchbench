@@ -1,4 +1,4 @@
-import { lstat, mkdir, realpath } from "node:fs/promises";
+import { lstat, mkdir, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pbError, type ErrorCode, type PatchBenchError } from "@/domain/errors";
 import { assertSafeId, isSafeId } from "@/lib/ids";
@@ -10,8 +10,10 @@ import { gitEnv } from "./git-adapter";
 /**
  * Candidate worktree lifecycle (architecture §10): one native Git worktree per
  * candidate under `<runtime>/worktrees/<run-id>/<candidate-id>` on branch
- * `patchbench/<run-id>/<candidate-id>`, plus a detached, branchless
- * reproduction workspace at `<runtime>/worktrees/<run-id>/reproduction`.
+ * `patchbench/<run-id>/<candidate-id>`, plus detached, branchless
+ * `baseline` and `reproduction` workspaces under the same run directory.
+ * The SHA each worktree was created from is recorded once in
+ * `<runtime>/worktrees/<run-id>/.meta/<id>.json`, outside every worktree.
  */
 export interface CandidateWorktree {
   runId: string;
@@ -21,8 +23,12 @@ export interface CandidateWorktree {
   baseSha: string;
 }
 
-export interface ReproductionWorkspace {
+/** Detached, branchless PatchBench workspaces at the baseline commit. */
+export type WorkspaceKind = "baseline" | "reproduction";
+
+export interface DetachedWorkspace {
   runId: string;
+  kind: WorkspaceKind;
   path: string;
   baseSha: string;
 }
@@ -35,18 +41,21 @@ export interface WorktreeManager {
   /** Removes the worktree and its PatchBench branch only. */
   remove(worktree: CandidateWorktree, repoRoot: string): Promise<Result<void, PatchBenchError>>;
   list(repoRoot: string, runId: string): Promise<Result<CandidateWorktree[], PatchBenchError>>;
-  /** `git worktree add --detach <runtime>/worktrees/<run>/reproduction <baseSha>`. */
-  createReproduction(input: { repoRoot: string; runId: string; baseSha: string }): Promise<Result<ReproductionWorkspace, PatchBenchError>>;
-  removeReproduction(workspace: ReproductionWorkspace, repoRoot: string): Promise<Result<void, PatchBenchError>>;
+  /** `git worktree add --detach <runtime>/worktrees/<run>/<kind> <baseSha>`. */
+  createWorkspace(input: { repoRoot: string; runId: string; baseSha: string; kind: WorkspaceKind }): Promise<Result<DetachedWorkspace, PatchBenchError>>;
+  removeWorkspace(workspace: DetachedWorkspace, repoRoot: string): Promise<Result<void, PatchBenchError>>;
 }
 
-/** Reserved directory name; never usable as a candidate id. */
+/** Reserved directory names; never usable as candidate ids. */
 export const REPRODUCTION_WORKSPACE_ID = "reproduction";
+export const BASELINE_WORKSPACE_ID = "baseline";
+const RESERVED_IDS: readonly string[] = [REPRODUCTION_WORKSPACE_ID, BASELINE_WORKSPACE_ID];
+const isReservedId = (id: string) => RESERVED_IDS.includes(id);
 
 const BRANCH_PREFIX = "patchbench/";
 
 export function candidateBranchName(runId: string, candidateId: string): string {
-  if (candidateId === REPRODUCTION_WORKSPACE_ID) throw new Error(`Reserved candidate id: ${candidateId}`);
+  if (isReservedId(candidateId)) throw new Error(`Reserved candidate id: ${candidateId}`);
   return `${BRANCH_PREFIX}${assertSafeId(runId, "run id")}/${assertSafeId(candidateId, "candidate id")}`;
 }
 
@@ -68,8 +77,15 @@ function candidateBranchNameSafe(runId = "", candidateId = ""): string | null {
   }
 }
 
-export function reproductionWorkspacePath(runtimeRoot: string, runId: string): string {
-  return path.join(path.resolve(runtimeRoot), "worktrees", assertSafeId(runId, "run id"), REPRODUCTION_WORKSPACE_ID);
+export function workspacePath(runtimeRoot: string, runId: string, kind: WorkspaceKind): string {
+  return path.join(path.resolve(runtimeRoot), "worktrees", assertSafeId(runId, "run id"), kind);
+}
+
+export const reproductionWorkspacePath = (runtimeRoot: string, runId: string): string => workspacePath(runtimeRoot, runId, "reproduction");
+
+/** Sidecar holding the immutable creation SHA (`.meta` is never a safe id, so it cannot collide). */
+function baseMetaPath(runtimeRoot: string, runId: string, id: string): string {
+  return path.join(path.resolve(runtimeRoot), "worktrees", assertSafeId(runId, "run id"), ".meta", `${assertSafeId(id)}.json`);
 }
 
 const SHA = /^[0-9a-f]{40}$/;
@@ -130,7 +146,7 @@ export class GitWorktreeManager implements WorktreeManager {
 
   async create(input: { repoRoot: string; runId: string; candidateId: string; baseSha: string }): Promise<Result<CandidateWorktree, PatchBenchError>> {
     const { repoRoot, runId, candidateId, baseSha } = input;
-    if (!isSafeId(runId) || !isSafeId(candidateId) || candidateId === REPRODUCTION_WORKSPACE_ID) {
+    if (!isSafeId(runId) || !isSafeId(candidateId) || isReservedId(candidateId)) {
       return err(pbError("WORKTREE_CREATE_FAILED", "Unsafe or reserved run/candidate id.", { detail: `${runId}/${candidateId}` }));
     }
     if (!SHA.test(baseSha)) return err(pbError("WORKTREE_CREATE_FAILED", "Baseline must be a full commit SHA."));
@@ -145,21 +161,46 @@ export class GitWorktreeManager implements WorktreeManager {
     if (!added.ok) return added;
     const head = await this.verifyHead(repoRoot, target, baseSha);
     if (!head.ok) return head;
+    const recorded = await this.recordBase(runId, candidateId, baseSha);
+    if (!recorded.ok) return recorded;
     return ok({ runId, candidateId, path: target, branchName, baseSha });
   }
 
-  async createReproduction(input: { repoRoot: string; runId: string; baseSha: string }): Promise<Result<ReproductionWorkspace, PatchBenchError>> {
-    const { repoRoot, runId, baseSha } = input;
-    if (!isSafeId(runId)) return err(pbError("WORKTREE_CREATE_FAILED", "Unsafe run id.", { detail: runId }));
+  async createWorkspace(input: { repoRoot: string; runId: string; baseSha: string; kind: WorkspaceKind }): Promise<Result<DetachedWorkspace, PatchBenchError>> {
+    const { repoRoot, runId, baseSha, kind } = input;
+    if (!isSafeId(runId) || !isReservedId(kind)) return err(pbError("WORKTREE_CREATE_FAILED", "Unsafe run id or workspace kind.", { detail: `${runId}/${kind}` }));
     if (!SHA.test(baseSha)) return err(pbError("WORKTREE_CREATE_FAILED", "Baseline must be a full commit SHA."));
-    const target = reproductionWorkspacePath(this.runtimeRoot, runId);
+    const target = workspacePath(this.runtimeRoot, runId, kind);
     const prepared = await this.prepareTarget(target);
     if (!prepared.ok) return prepared;
-    const added = await this.gitOk(repoRoot, ["worktree", "add", "--detach", target, baseSha], "WORKTREE_CREATE_FAILED", "Could not create reproduction workspace.");
+    const added = await this.gitOk(repoRoot, ["worktree", "add", "--detach", target, baseSha], "WORKTREE_CREATE_FAILED", `Could not create ${kind} workspace.`);
     if (!added.ok) return added;
     const head = await this.verifyHead(repoRoot, target, baseSha);
     if (!head.ok) return head;
-    return ok({ runId, path: target, baseSha });
+    const recorded = await this.recordBase(runId, kind, baseSha);
+    if (!recorded.ok) return recorded;
+    return ok({ runId, kind, path: target, baseSha });
+  }
+
+  /** Write-once record of the creation SHA; later commits in the worktree never change it. */
+  private async recordBase(runId: string, id: string, baseSha: string): Promise<Result<void, PatchBenchError>> {
+    const file = baseMetaPath(this.runtimeRoot, runId, id);
+    try {
+      await mkdir(path.dirname(file), { recursive: true });
+      await writeFile(file, `${JSON.stringify({ baseSha })}\n`, { encoding: "utf8", flag: "wx" });
+      return ok(undefined);
+    } catch (cause) {
+      return err(pbError("WORKTREE_CREATE_FAILED", "Could not record the worktree baseline.", { detail: String(cause) }));
+    }
+  }
+
+  private async readBase(runId: string, id: string): Promise<string | null> {
+    try {
+      const parsed = JSON.parse(await readFile(baseMetaPath(this.runtimeRoot, runId, id), "utf8")) as { baseSha?: unknown };
+      return typeof parsed.baseSha === "string" && SHA.test(parsed.baseSha) ? parsed.baseSha : null;
+    } catch {
+      return null;
+    }
   }
 
   /** Removes the worktree (discarding its changes) and its PatchBench branch only. */
@@ -178,20 +219,26 @@ export class GitWorktreeManager implements WorktreeManager {
     const removed = await this.removeWorktree(repoRoot, expectedPath);
     if (!removed.ok) return removed;
     const deleted = await this.gitOk(repoRoot, ["branch", "-D", "--", expectedBranch], "COMMAND_FAILED", "Worktree removed, but its branch could not be deleted.");
-    return deleted.ok ? ok(undefined) : deleted;
+    if (!deleted.ok) return deleted;
+    await rm(baseMetaPath(this.runtimeRoot, worktree.runId, worktree.candidateId), { force: true });
+    return ok(undefined);
   }
 
-  async removeReproduction(workspace: ReproductionWorkspace, repoRoot: string): Promise<Result<void, PatchBenchError>> {
+  async removeWorkspace(workspace: DetachedWorkspace, repoRoot: string): Promise<Result<void, PatchBenchError>> {
     let expectedPath: string;
     try {
-      expectedPath = reproductionWorkspacePath(this.runtimeRoot, workspace.runId);
+      if (!isReservedId(workspace.kind)) throw new Error(`unknown workspace kind ${workspace.kind}`);
+      expectedPath = workspacePath(this.runtimeRoot, workspace.runId, workspace.kind);
     } catch (cause) {
       return err(pbError("PATH_OUTSIDE_ALLOWED_ROOT", "Refusing to remove a non-PatchBench workspace.", { detail: String(cause) }));
     }
     if (path.resolve(workspace.path) !== expectedPath) {
       return err(pbError("PATH_OUTSIDE_ALLOWED_ROOT", "Refusing to remove a non-PatchBench workspace.", { detail: workspace.path }));
     }
-    return this.removeWorktree(repoRoot, expectedPath);
+    const removed = await this.removeWorktree(repoRoot, expectedPath);
+    if (!removed.ok) return removed;
+    await rm(baseMetaPath(this.runtimeRoot, workspace.runId, workspace.kind), { force: true });
+    return ok(undefined);
   }
 
   private async removeWorktree(repoRoot: string, target: string): Promise<Result<void, PatchBenchError>> {
@@ -203,7 +250,11 @@ export class GitWorktreeManager implements WorktreeManager {
     return ok(undefined);
   }
 
-  /** Candidate worktrees of one run, as reported by `git worktree list --porcelain`. */
+  /**
+   * Candidate worktrees of one run, as reported by `git worktree list
+   * --porcelain`. `baseSha` is the recorded creation SHA, not the current
+   * HEAD; worktrees without a PatchBench base record are not listed.
+   */
   async list(repoRoot: string, runId: string): Promise<Result<CandidateWorktree[], PatchBenchError>> {
     if (!isSafeId(runId)) return err(pbError("PATH_OUTSIDE_ALLOWED_ROOT", "Unsafe run id.", { detail: runId }));
     const out = await this.gitOk(repoRoot, ["worktree", "list", "--porcelain"], "COMMAND_FAILED", "Could not list worktrees.");
@@ -214,11 +265,12 @@ export class GitWorktreeManager implements WorktreeManager {
       const fields = new Map(block.split("\n").filter(Boolean).map((l) => [l.split(" ")[0]!, l.slice(l.indexOf(" ") + 1)]));
       const wtPath = fields.get("worktree");
       const branch = fields.get("branch")?.replace(/^refs\/heads\//, "");
-      const head = fields.get("HEAD");
-      if (!wtPath || !branch || !head || path.dirname(wtPath) !== runDir) continue;
+      if (!wtPath || !branch || path.dirname(wtPath) !== runDir) continue;
       const candidateId = path.basename(wtPath);
-      if (!isSafeId(candidateId) || candidateId === REPRODUCTION_WORKSPACE_ID || branch !== candidateBranchName(runId, candidateId)) continue;
-      result.push({ runId, candidateId, path: wtPath, branchName: branch, baseSha: head });
+      if (!isSafeId(candidateId) || isReservedId(candidateId) || branch !== candidateBranchName(runId, candidateId)) continue;
+      const baseSha = await this.readBase(runId, candidateId);
+      if (!baseSha) continue;
+      result.push({ runId, candidateId, path: wtPath, branchName: branch, baseSha });
     }
     return ok(result.sort((a, b) => a.candidateId.localeCompare(b.candidateId)));
   }
