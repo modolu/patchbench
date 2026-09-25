@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Fixture repositories are standalone projects with their own tooling.
+    "fixtures/**",
+    "tests/fixtures/**",
+    ".patchbench/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

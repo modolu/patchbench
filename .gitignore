@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright
+/playwright-report/
+/test-results/
+/blob-report/
+
+# PatchBench runtime artifacts (runs, worktrees, logs) stay local
+/.patchbench/*
+!/.patchbench/README.md
