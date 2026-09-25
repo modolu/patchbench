@@ -18,6 +18,22 @@ export interface GitAdapterOptions {
 
 const SHA = /^[0-9a-f]{40}$/;
 
+export interface StatusEntry {
+  /** Index status column (`?` for untracked). */
+  x: string;
+  /** Worktree status column. */
+  y: string;
+  path: string;
+}
+
+/** Parses `git status --porcelain=v1 -z --no-renames`. */
+export function parseStatusZ(output: string): StatusEntry[] {
+  return output
+    .split("\0")
+    .filter((record) => record.length > 3)
+    .map((record) => ({ x: record[0]!, y: record[1]!, path: record.slice(3) }));
+}
+
 export function parseNumstat(output: string): NumstatEntry[] {
   return output
     .split("\n")
@@ -33,9 +49,10 @@ export function parseNumstat(output: string): NumstatEntry[] {
 }
 
 /**
- * Typed wrapper over native `git`. Read-only/basic operations only here;
- * worktree lifecycle lives behind `WorktreeManager` (worktrees.ts).
- * Never modifies Git config, resets, merges, or pushes.
+ * Typed wrapper over native `git`. Read-only operations plus `git apply` onto
+ * PatchBench-owned workspaces (enforced by `allowedRoots`); worktree lifecycle lives behind
+ * `WorktreeManager` (worktrees.ts). Never modifies Git config, resets,
+ * checks out, cleans, merges, or pushes.
  */
 export class GitAdapter {
   private readonly env = buildCommandEnv(DEFAULT_ENV_ALLOW_LIST, {
@@ -106,5 +123,20 @@ export class GitAdapter {
     const range = head ? [`${base}...${head}`] : [base];
     const r = await this.gitOk(cwd, ["diff", "--numstat", "--no-renames", ...range, "--"]);
     return r.ok ? ok(parseNumstat(r.value)) : r;
+  }
+
+  /** Every tracked change and untracked file (not ignored), one entry per path. */
+  async statusEntries(cwd: string): Promise<Result<StatusEntry[], PatchBenchError>> {
+    const r = await this.gitOk(cwd, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--no-renames"]);
+    return r.ok ? ok(parseStatusZ(r.value)) : r;
+  }
+
+  /** `git apply [--check]` of a patch file onto the working tree of `cwd`. */
+  async applyPatch(cwd: string, patchPath: string, opts: { check: boolean }): Promise<Result<void, PatchBenchError>> {
+    const r = await this.gitOk(cwd, [
+      "-c", "core.autocrlf=false",
+      "apply", ...(opts.check ? ["--check"] : []), "--whitespace=nowarn", patchPath,
+    ]);
+    return r.ok ? ok(undefined) : r;
   }
 }
