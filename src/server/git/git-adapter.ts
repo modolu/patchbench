@@ -139,4 +139,13 @@ export class GitAdapter {
     ]);
     return r.ok ? ok(undefined) : r;
   }
+
+  /**
+   * Marks untracked (non-ignored) files intent-to-add so working-tree diffs
+   * include them. Writes the index of `cwd`: PatchBench-owned worktrees only.
+   */
+  async intentToAddAll(cwd: string): Promise<Result<void, PatchBenchError>> {
+    const r = await this.gitOk(cwd, ["add", "--intent-to-add", "--all", "--", "."]);
+    return r.ok ? ok(undefined) : r;
+  }
 }
