@@ -1,0 +1,6 @@
+{
+  "testFiles": ["src/errors.ts", "test/refresh-expired.test.ts"],
+  "command": "node --test test/refresh-expired.test.ts",
+  "expectedFailure": "expected 401, received 500",
+  "notes": "Negative scenario: claims a production file as a test file; the gate's git status check must reject it."
+}

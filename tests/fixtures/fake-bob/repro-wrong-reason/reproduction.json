@@ -1,0 +1,6 @@
+{
+  "testFiles": ["test/refresh-expired.test.ts"],
+  "command": "node --test test/refresh-expired.test.ts",
+  "expectedFailure": "expected 401, received 500",
+  "notes": "Negative scenario: fails on an unrelated body assertion, not the expected status."
+}

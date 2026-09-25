@@ -1,0 +1,6 @@
+{
+  "testFiles": ["test/refresh-expired.test.ts"],
+  "command": "node --test test/refresh-expired.test.ts",
+  "expectedFailure": "expected 401, received 500",
+  "notes": "Negative scenario: asserts only non-200, which the baseline already satisfies."
+}
