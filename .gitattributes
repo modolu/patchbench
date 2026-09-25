@@ -1,0 +1,2 @@
+# Source-of-truth docs are kept byte-identical; their trailing double spaces are Markdown hard line breaks.
+docs/PATCHBENCH_*.md whitespace=-trailing-space
