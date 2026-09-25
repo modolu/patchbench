@@ -48,6 +48,10 @@ export function parseNumstat(output: string): NumstatEntry[] {
     });
 }
 
+/** Minimal, non-interactive environment for every PatchBench Git invocation. */
+export const gitEnv = (): Record<string, string> =>
+  buildCommandEnv(DEFAULT_ENV_ALLOW_LIST, { GIT_TERMINAL_PROMPT: "0", GIT_OPTIONAL_LOCKS: "0", LC_ALL: "C" });
+
 /**
  * Typed wrapper over native `git`. Read-only operations plus `git apply` onto
  * PatchBench-owned workspaces (enforced by `allowedRoots`); worktree lifecycle lives behind
@@ -55,11 +59,7 @@ export function parseNumstat(output: string): NumstatEntry[] {
  * checks out, cleans, merges, or pushes.
  */
 export class GitAdapter {
-  private readonly env = buildCommandEnv(DEFAULT_ENV_ALLOW_LIST, {
-    GIT_TERMINAL_PROMPT: "0",
-    GIT_OPTIONAL_LOCKS: "0",
-    LC_ALL: "C",
-  });
+  private readonly env = gitEnv();
 
   constructor(private readonly opts: GitAdapterOptions) {}
 
