@@ -1,0 +1,13 @@
+import { HttpError, InvalidTokenError, ValidationError } from "./errors.ts";
+
+export interface ErrorBody {
+  error: string;
+}
+
+/** Maps thrown errors to HTTP responses. Unknown errors never leak details. */
+export function toErrorResponse(error: unknown): { status: number; body: ErrorBody } {
+  if (error instanceof ValidationError) return { status: 400, body: { error: "invalid_request" } };
+  if (error instanceof InvalidTokenError) return { status: 401, body: { error: "invalid_token" } };
+  if (error instanceof HttpError) return { status: error.status, body: { error: error.code } };
+  return { status: 500, body: { error: "internal_error" } };
+}

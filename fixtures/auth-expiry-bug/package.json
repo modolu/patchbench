@@ -1,0 +1,17 @@
+{
+  "name": "auth-expiry-bug-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PatchBench demo fixture: tiny auth API with a deterministic refresh-token defect. Synthetic data only.",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@11.5.1"
+}
