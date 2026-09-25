@@ -1,0 +1,26 @@
+[
+  {
+    "id": "a",
+    "title": "Map TokenExpiredError in the HTTP error mapper",
+    "rationale": "The domain already distinguishes expiry; the HTTP boundary simply lacks a mapping for it.",
+    "likelyFiles": ["src/http-errors.ts"],
+    "tradeoffs": ["Smallest change", "Every route gains the mapping, which is the documented contract"],
+    "implementationBrief": "Add a TokenExpiredError branch to toErrorResponse returning 401 { error: \"token_expired\" }."
+  },
+  {
+    "id": "b",
+    "title": "Treat any refresh failure as unauthorized",
+    "rationale": "Clients only need to know they must log in again when refresh fails.",
+    "likelyFiles": ["src/app.ts"],
+    "tradeoffs": ["Simple catch-all", "Collapses distinct failure modes into one status"],
+    "implementationBrief": "Wrap the refresh route in a try/catch that returns 401 { error: \"invalid_token\" } for any thrown error."
+  },
+  {
+    "id": "c",
+    "title": "Handle expiry explicitly in the refresh route",
+    "rationale": "Expiry is only meaningful for the refresh flow; keep the global mapper untouched.",
+    "likelyFiles": ["src/app.ts"],
+    "tradeoffs": ["Local, explicit handling", "Other routes that surface expiry would need their own handling"],
+    "implementationBrief": "Catch TokenExpiredError around auth.refresh in the refresh route and return 401 { error: \"token_expired\" }; rethrow anything else."
+  }
+]

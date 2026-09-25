@@ -1,0 +1,6 @@
+{
+  "testFiles": ["test/refresh-expired.test.ts"],
+  "command": "node --test test/refresh-expired.test.ts",
+  "expectedFailure": "expected 401, received 500",
+  "notes": "AuthService.refresh throws TokenExpiredError for expired tokens; toErrorResponse has no mapping for it, so it falls through to 500."
+}
