@@ -1,5 +1,7 @@
 import { pbError, type PatchBenchError } from "@/domain/errors";
 import type { PatchBenchRun } from "@/domain/run";
+import { access } from "node:fs/promises";
+import path from "node:path";
 import { ok, type Result } from "@/lib/result";
 import { systemClock, type Clock } from "@/lib/time";
 import type { BobAdapter } from "../bob/adapter";
@@ -10,8 +12,11 @@ import type { WorktreeManager } from "../git/worktrees";
 import { loadFrozenArtifact } from "../reproduction/regression-artifact";
 import { runReproductionGate } from "../reproduction/reproduction-service";
 import { transitionRun } from "./lifecycle";
+import { captureBaseline } from "../verification/baseline";
+import { buildEvidenceMatrix } from "../verification/evidence-builder";
+import { verifyCandidate, writeCandidateProjection } from "../verification/verifier";
 import { captureRepositorySnapshot } from "./repository-snapshot";
-import type { FileRunStore } from "./store";
+import { writeFileAtomic, type FileRunStore } from "./store";
 
 export interface PipelineDeps {
   store: FileRunStore;
@@ -21,14 +26,14 @@ export interface PipelineDeps {
 }
 
 /**
- * Deterministic pipeline: baseline → reproduction workspace → reproduction
- * gate → strategies → candidate worktrees (frozen regression injected) →
- * sequential candidate implementation → frozen-test integrity check.
+ * Deterministic pipeline: clean baseline worktree + baseline checks →
+ * reproduction workspace → reproduction gate → strategies → candidate
+ * worktrees (frozen regression injected) → sequential implementation →
+ * shared verification → evidence matrix (report.json) → COMPLETE.
  *
- * Stops with the run in VERIFYING: the shared verifier (tests, typecheck,
- * build, baseline subtraction, evidence matrix) is the next milestone step.
- * Returns the run in whatever state it reached; err only when the run could
- * not be loaded or a transition was invalid.
+ * `dependencySource` defaults to `<repo>/node_modules` when present; each
+ * worktree gets a private copy. Returns the run in whatever state it reached;
+ * err only when the run could not be loaded or a transition was invalid.
  */
 export async function runDeterministicPipeline(
   deps: PipelineDeps,
@@ -52,8 +57,12 @@ export async function runDeterministicPipeline(
   if (snapshot.value.commitSha !== run.repository.commitSha) {
     return to("BLOCKED_BASELINE", pbError("REPO_DIRTY", "Repository HEAD moved since the run was created.", { detail: `${run.repository.commitSha} → ${snapshot.value.commitSha}` }));
   }
-  // A dirty primary worktree is allowed (candidates start from the commit) but must be visible.
+  // A dirty primary worktree is allowed (every check runs on the commit) but must be visible.
   await store.appendEvent(runId, { type: "baseline.captured", data: { commitSha: snapshot.value.commitSha, isDirty: snapshot.value.isDirty } });
+  const defaultDeps = path.join(repoRoot, "node_modules");
+  const dependencySource = input.dependencySource ?? ((await access(defaultDeps).then(() => true, () => false)) ? defaultDeps : undefined);
+  const baseline = await captureBaseline({ store, worktrees, clock }, { runId, dependencySource, signal: input.signal });
+  if (!baseline.ok) return to(baseline.error.code === "COMMAND_CANCELLED" ? "CANCELLED" : "FAILED", baseline.error);
 
   // Reproduction in a PatchBench-owned detached worktree.
   r = await to("REPRODUCING");
@@ -83,7 +92,7 @@ export async function runDeterministicPipeline(
 
   r = await to("PREPARING_CANDIDATES");
   if (!r.ok) return r;
-  const prepared = await prepareCandidates({ store, bob, worktrees, clock }, { runId, frozen: frozen.value, dependencySource: input.dependencySource });
+  const prepared = await prepareCandidates({ store, bob, worktrees, clock }, { runId, frozen: frozen.value, dependencySource });
   if (!prepared.ok) return to("FAILED", prepared.error);
   if (prepared.value.every((c) => c.status === "FAILED")) {
     return to("FAILED", pbError("WORKTREE_CREATE_FAILED", "No candidate worktree could be prepared."));
@@ -99,5 +108,25 @@ export async function runDeterministicPipeline(
   }
 
   r = await to("VERIFYING");
+  if (!r.ok) return r;
+  for (const candidate of r.value.candidates.filter((c) => c.status === "VERIFYING")) {
+    if (input.signal?.aborted) return to("CANCELLED", pbError("COMMAND_CANCELLED", "Run was cancelled.", { recoverable: true }));
+    const verified = await verifyCandidate({ store, clock }, { runId, candidateId: candidate.id, signal: input.signal });
+    if (!verified.ok) return to("FAILED", verified.error);
+  }
+
+  // Evidence: projections + matrix are derived from run.json, the single source of truth.
+  const settled = await store.loadRun(runId);
+  if (!settled.ok) return settled;
+  const rejected = settled.value.candidates.filter((c) => c.status === "REJECTED").length;
+  const final = { ...settled.value, metrics: { ...settled.value.metrics, candidatesRejected: rejected } };
+  await store.saveRun(final);
+  for (const c of final.candidates) await writeCandidateProjection(store, runId, c);
+  await writeFileAtomic(path.join(store.runDir(runId), "report.json"), `${JSON.stringify(buildEvidenceMatrix(final), null, 2)}\n`);
+  await store.appendEvent(runId, {
+    type: "run.completed",
+    data: Object.fromEntries(["ELIGIBLE", "REJECTED", "FAILED", "TIMED_OUT"].map((s) => [s.toLowerCase(), final.candidates.filter((c) => c.status === s).map((c) => c.id)])),
+  });
+  r = await to("COMPLETE");
   return r.ok ? ok(r.value) : r;
 }

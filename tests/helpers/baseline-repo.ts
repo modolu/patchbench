@@ -1,12 +1,13 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import { git } from "./git";
 import { copyFixture } from "./scenario";
 
-/** Fixture copied into `<dir>/primary` and committed as the baseline. */
-export async function makeBaselineRepo(dir: string): Promise<{ primary: string; sha: string }> {
+/** Fixture (plus optional extra files) copied into `<dir>/primary` and committed as the baseline. */
+export async function makeBaselineRepo(dir: string, extraFiles: Record<string, string> = {}): Promise<{ primary: string; sha: string }> {
   const primary = await copyFixture(path.join(dir, "primary"));
+  for (const [rel, content] of Object.entries(extraFiles)) await writeFile(path.join(primary, rel), content);
   git(primary, "init", "-q");
   git(primary, "add", "-A");
   git(primary, "commit", "-q", "-m", "baseline");
