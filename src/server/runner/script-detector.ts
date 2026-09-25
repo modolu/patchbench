@@ -1,6 +1,7 @@
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import type { RunPolicy, VerificationCommand } from "@/domain/policy";
 import type { PackageManager, RepositorySnapshot } from "@/domain/run";
 
 const PackageJsonSchema = z.object({
@@ -59,4 +60,20 @@ export async function detectScripts(repoRoot: string): Promise<ScriptDetection |
 /** `<pm> run <script>` as an argument array. npm is used when the manager is unknown. */
 export function scriptInvocation(pm: PackageManager, script: VerificationScript): { command: string; args: string[] } {
   return { command: pm === "unknown" ? "npm" : pm, args: ["run", script] };
+}
+
+/**
+ * Shared verification commands from detected scripts, in the canonical order
+ * test → typecheck → lint → build. Absent scripts are simply not configured.
+ * `required` follows policy; test pass/fail is judged by new failures vs
+ * baseline, and lint is evidence only.
+ */
+export function verificationCommandsFor(
+  repository: Pick<RepositorySnapshot, "packageManager" | "detectedScripts">,
+  policy: Pick<RunPolicy, "requireBuild" | "requireTypecheck">,
+): VerificationCommand[] {
+  const required: Record<VerificationScript, boolean> = { test: true, typecheck: policy.requireTypecheck, lint: false, build: policy.requireBuild };
+  return (["test", "typecheck", "lint", "build"] as const)
+    .filter((name) => repository.detectedScripts[name])
+    .map((name) => ({ name, ...scriptInvocation(repository.packageManager, name), required: required[name] }));
 }
