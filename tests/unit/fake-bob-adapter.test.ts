@@ -2,7 +2,7 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { FakeBobAdapter } from "@/server/bob/fake-adapter";
-import { ReproductionProposalSchema, StrategiesSchema } from "@/server/bob/schemas";
+import { ReproductionProposalSchema, StrategiesSchema, isCanonicalRelativePath } from "@/server/bob/schemas";
 import { makeRun, makeTempDir } from "../helpers/factories";
 import { FAKE_SCENARIO_DIR } from "../helpers/scenario";
 
@@ -92,6 +92,25 @@ describe("FakeBobAdapter", () => {
     expect(r.ok || r.error.code).toBe("REGRESSION_TEST_MUTATED");
   });
 
+  it("rejects non-canonical frozen path spellings instead of letting them bypass the check", async () => {
+    const ws = await workspace("frozen-alias");
+    const reproduction = await reproduce(ws);
+    const strategies = await bob.generateStrategies({ runId: run.id, workspace: ws, issue: run.issue, reproduction, maxStrategies: 3 });
+    if (!strategies.ok) throw new Error("strategies");
+    for (const alias of ["./src/http-errors.ts", "src//http-errors.ts", "src\\http-errors.ts"]) {
+      const r = await bob.implementStrategy({
+        runId: run.id,
+        candidateId: "a",
+        workspace: ws,
+        issue: run.issue,
+        reproduction,
+        strategy: strategies.value[0]!,
+        frozenTestPaths: [alias],
+      });
+      expect(r.ok).toBe(false);
+    }
+  });
+
   it("reports malformed scenario output as BOB_OUTPUT_INVALID", async () => {
     const scenario = await workspace("bad-scenario");
     await writeFile(path.join(scenario, "strategies.json"), JSON.stringify([{ id: "a" }]));
@@ -113,6 +132,14 @@ describe("Bob output schemas", () => {
     expect(ReproductionProposalSchema.safeParse({ ...base, testFiles: ["../evil.ts"] }).success).toBe(false);
     expect(ReproductionProposalSchema.safeParse({ ...base, testFiles: ["/etc/x"] }).success).toBe(false);
     expect(ReproductionProposalSchema.safeParse({ ...base, testFiles: [] }).success).toBe(false);
+  });
+
+  it("require canonical POSIX-relative spellings", () => {
+    const base = { command: "x", expectedFailure: "x", notes: "" };
+    for (const bad of ["./test/foo.ts", "test//foo.ts", "test\\foo.ts", "test/./foo.ts", "test/", "C:/x.ts", "test/../x.ts"]) {
+      expect(ReproductionProposalSchema.safeParse({ ...base, testFiles: [bad] }).success, bad).toBe(false);
+    }
+    expect(isCanonicalRelativePath("test/foo.test.ts")).toBe(true);
   });
 
   it("require 2–3 strategies", () => {

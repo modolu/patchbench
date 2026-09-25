@@ -7,7 +7,7 @@ import { isSafeId } from "@/lib/ids";
 import { resolveRelativeWithin } from "@/lib/paths";
 import { err, ok, type Result } from "@/lib/result";
 import type { BobAdapter, ImplementationInput, ReproductionInput, StrategyInput } from "./adapter";
-import { ReproductionProposalSchema, StrategiesSchema, type ImplementationResult, type ReproductionProposal } from "./schemas";
+import { ReproductionProposalSchema, StrategiesSchema, isCanonicalRelativePath, type ImplementationResult, type ReproductionProposal } from "./schemas";
 
 /** Sorted relative file list, so output order is deterministic across platforms. */
 async function listFiles(dir: string, prefix = ""): Promise<string[]> {
@@ -83,7 +83,13 @@ export class FakeBobAdapter implements BobAdapter {
     frozen: readonly string[],
   ): Promise<Result<void, PatchBenchError>> {
     const targets: Array<[string, string]> = [];
+    if (!frozen.every(isCanonicalRelativePath)) {
+      return err(pbError("PATH_OUTSIDE_ALLOWED_ROOT", "Frozen test paths must be canonical relative paths.", { detail: frozen.join(", ") }));
+    }
     for (const rel of files) {
+      if (!isCanonicalRelativePath(rel)) {
+        return err(pbError("PATH_OUTSIDE_ALLOWED_ROOT", "Bob output path is not canonical.", { detail: rel }));
+      }
       if (frozen.includes(rel)) {
         return err(pbError("REGRESSION_TEST_MUTATED", "Candidate attempted to modify the frozen regression test.", { detail: rel }));
       }
