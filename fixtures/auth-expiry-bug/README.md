@@ -22,5 +22,6 @@ repository. All users, tokens, and credentials are synthetic.
 ```bash
 pnpm test        # node --test (no install required, Node >= 22.18)
 pnpm typecheck   # requires pnpm install
+pnpm lint        # strict unused-code checks via tsc (no extra dependencies)
 pnpm build
 ```
