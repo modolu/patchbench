@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PatchBench
 
-## Getting Started
+**Make AI patches prove themselves.**
 
-First, run the development server:
+PatchBench is a local-first developer tool that makes AI-generated bug fixes
+compete against reproducible tests and repository evidence before a developer
+trusts one. Built by Shipyard for the IBM Bob 2.0 Hackathon.
+
+> Reproduce before repair: a regression test must fail on the untouched
+> baseline before any candidate fix is written. That test is then frozen and
+> used, unchanged, against every candidate.
+
+## Status
+
+Milestones 0–1 (scaffold + deterministic core, no live Bob). See
+`docs/PATCHBENCH_ARCHITECTURE.md` §30 for the milestone plan.
+
+## Requirements
+
+- Node.js ≥ 22.18 (native TypeScript for the fixture's `node --test`)
+- pnpm 11
+- Git
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev             # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Verification
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test            # unit + integration, fake Bob adapter, zero Bobcoins
+pnpm build
+pnpm test:e2e        # requires: pnpm exec playwright install chromium
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Layout
 
-## Learn More
+```text
+docs/            source-of-truth product brief, architecture, execution plan
+src/domain/      Zod schemas: run, candidate, evidence, events, policy, errors
+src/server/      runs (state machine, store), runner, git, bob, …
+fixtures/        auth-expiry-bug demo repository (synthetic data)
+tests/           unit, integration, e2e, fake Bob scenarios
+bob_sessions/    IBM Bob IDE task-summary screenshots
+.bob/            Bob project rules
+```
 
-To learn more about Next.js, take a look at the following resources:
+## IBM Bob usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Development:** IBM Bob IDE tasks per `docs/PATCHBENCH_HACKATHON_EXECUTION_PLAN.md` §4;
+  session summaries in `bob_sessions/`.
+- **Product:** Bob sits behind a `BobAdapter` boundary. Tests and local
+  development use a deterministic `FakeBobAdapter`; the bounded Bob Shell
+  adapter arrives in Milestone 4. No Bob credentials are stored in this repo.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Data & privacy
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The demo fixture uses synthetic users and tokens only.
+- Runtime artifacts (`.patchbench/`) stay local and are gitignored.
+- Captured command output is secret-redacted before it is persisted.
