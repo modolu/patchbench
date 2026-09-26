@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PatchBench — UI Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --shell:#0C0D0E;--bg:#111214;--panel:#16171A;--panel2:#1C1D21;--line:#25272B;--line2:#33353A;
+  --text:#ECE7DD;--muted:#A39E94;--dim:#6F6B64;
+  --amber:#F0A63A;--amber-bg:rgba(240,166,58,.09);--amber-ln:rgba(240,166,58,.35);
+  --green:#8BBB8E;--green-bg:rgba(139,187,142,.09);--green-ln:rgba(139,187,142,.35);
+  --red:#E4705F;--red-bg:rgba(228,112,95,.09);--red-ln:rgba(228,112,95,.38);
+  --paper:#F2EEE5;--paper2:#E8E3D6;--ink:#1B1A17;--ink2:#56524A;--ink3:#8B867B;--pline:#D9D3C5;
+  --pgreen:#2D6A3C;--pred:#A5352A;
+  --sans:'Geist','Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'Geist Mono','JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#08090A;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.mono{font-family:var(--mono)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px;border-radius:4px}
+
+/* ---------- presentation chrome ---------- */
+.chrome{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 28px 14px;max-width:1488px;margin:0 auto}
+.chrome h1{font-size:13px;font-weight:500;color:var(--muted)}
+.chrome h1 b{color:var(--text);font-weight:600}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:5px;cursor:pointer;color:var(--muted);font-size:12.5px;font-weight:500;display:flex;gap:8px;align-items:center}
+.seg button .n{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.seg button[aria-selected="true"]{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line2)}
+.stage{overflow-x:auto;padding:0 28px 40px}
+.app{max-width:1432px;min-width:1240px;margin:0 auto;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.screen[hidden]{display:none}
+
+/* ---------- app bar ---------- */
+.appbar{height:50px;display:flex;align-items:center;gap:18px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--shell)}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;font-size:13.5px;letter-spacing:-.01em;padding-right:16px;border-right:1px solid var(--line);height:100%}
+.crumbs{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12.5px}
+.crumbs .sep{color:var(--dim)}
+.crumbs .cur{color:var(--text)}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.07em;padding:3px 8px;border-radius:4px;border:1px solid;white-space:nowrap}
+.pill.amber{color:var(--amber);border-color:var(--amber-ln);background:var(--amber-bg)}
+.pill.green{color:var(--green);border-color:var(--green-ln);background:var(--green-bg)}
+.pill.red{color:var(--red);border-color:var(--red-ln);background:var(--red-bg)}
+.pill.neutral{color:var(--muted);border-color:var(--line2);background:var(--panel2)}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.3}}
+.clock{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.clock b{color:var(--text);font-weight:500}
+.btn{height:30px;padding:0 12px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);font-size:12.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s,opacity .15s}
+.btn:hover{border-color:#4A4D53}
+.btn.primary{background:var(--text);color:#111;border-color:var(--text)}
+.btn.primary:hover{background:#fff}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.primary:disabled:hover{background:var(--text)}
+.kbd{font-family:var(--mono);font-size:10px;color:var(--dim);border:1px solid var(--line2);border-radius:3px;padding:0 4px;line-height:15px}
+.btn.primary .kbd{color:#555;border-color:#bbb}
+
+/* ---------- layout ---------- */
+.body{display:grid;grid-template-columns:264px 1fr;min-height:840px}
+.rail{border-right:1px solid var(--line);background:var(--shell);padding:18px 16px;display:flex;flex-direction:column;gap:22px}
+.main{padding:20px 24px 28px;min-width:0}
+.label{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-top:10px;font-size:12px}
+.kv dt{color:var(--dim)}
+.kv dd{font-family:var(--mono);font-size:11.5px;color:var(--text);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.timeline{list-style:none;margin-top:10px}
+.timeline li{display:grid;grid-template-columns:18px 1fr auto;gap:10px;padding:7px 0 9px;position:relative}
+.timeline li:not(:last-child)::after{content:"";position:absolute;left:8.5px;top:27px;bottom:-5px;width:1px;background:var(--line2)}
+.timeline li.done:not(:last-child)::after{background:var(--green-ln)}
+.tl-ico{width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:10px;font-family:var(--mono);color:var(--dim);background:var(--shell);position:relative;z-index:1}
+.done .tl-ico{border-color:var(--green-ln);color:var(--green)}
+.active .tl-ico{border-color:var(--amber)}
+.active .tl-ico::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.active .tl-ico::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid var(--amber-ln);animation:ring 1.8s ease-out infinite}
+@keyframes ring{from{transform:scale(.8);opacity:1}to{transform:scale(1.35);opacity:0}}
+.tl-name{font-weight:500;font-size:12.5px}
+.todo .tl-name{color:var(--dim)}
+.tl-sub{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:1px}
+.active .tl-sub{color:var(--amber)}
+.tl-time{font-family:var(--mono);font-size:10.5px;color:var(--dim);padding-top:2px}
+.rail-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.meter{height:4px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--muted)}
+
+/* ---------- screen 0 : new benchmark ---------- */
+.runs{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:2px}
+.runs li{padding:9px 10px;border-radius:6px;border:1px solid transparent;cursor:pointer}
+.runs li:hover{background:var(--panel);border-color:var(--line)}
+.runs .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.runs .rid{font-family:var(--mono);font-size:11.5px;color:var(--text)}
+.runs .rrepo{font-size:12px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.runs .rwhy{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:2px}
+.runs .pill{font-size:9.5px;padding:1px 6px}
+
+.head0 h2{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.head0 p{color:var(--muted);font-size:13px;margin-top:4px;max-width:680px}
+.head0 p b{color:var(--text);font-weight:500}
+.nb{display:grid;grid-template-columns:1fr 392px;gap:16px;margin-top:18px;align-items:start}
+.nb-col{display:flex;flex-direction:column;gap:12px}
+.step-h{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.step-h h3{font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+.step-h .sub{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.stepn{width:20px;height:20px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.stepn.ok{border-color:var(--green-ln);color:var(--green)}
+.step-b{padding:4px 16px 16px}
+.field{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.field>label,.flabel{font-size:12.5px;font-weight:500;display:flex;align-items:baseline;gap:8px}
+.field>label .req,.flabel .req{font-family:var(--mono);font-size:10px;color:var(--dim);font-weight:400;letter-spacing:.04em}
+.field>label .cnt{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);font-weight:400}
+.input,textarea.input,select.input{width:100%;background:#0B0C0D;border:1px solid var(--line2);border-radius:6px;color:var(--text);font:13px/1.5 var(--sans);padding:8px 11px;outline:none;transition:border-color .15s,box-shadow .15s;resize:vertical}
+.input:hover{border-color:#44464C}
+.input:focus{border-color:#7A7C82;box-shadow:0 0 0 3px rgba(236,231,221,.07)}
+.input.mono{font-family:var(--mono);font-size:12px}
+.input.err{border-color:var(--red-ln)}
+select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 15px) 55%,calc(100% - 11px) 55%;background-size:4px 4px;background-repeat:no-repeat;padding-right:28px}
+.hint{font-size:11.5px;color:var(--dim)}
+.hint code{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.row{display:flex;gap:8px}
+.row .input{flex:1}
+.grid2{display:grid;grid-template-columns:180px 1fr;gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line2);background:var(--panel2);border-radius:4px;padding:2px 8px}
+.chip .gl{color:var(--green)}
+.chip.x{color:var(--dim)}
+.readonly{display:flex;align-items:center;gap:8px;height:37px;padding:0 11px;border:1px dashed var(--line2);border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden}
+.readonly b{color:var(--text);font-weight:500}
+.disclose{margin-top:14px;width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px dashed var(--line2);border-radius:6px;background:transparent;cursor:pointer;text-align:left}
+.disclose:hover{border-color:#4A4D53}
+.disclose .car{font-family:var(--mono);color:var(--muted);transition:transform .15s;display:inline-block}
+.disclose[aria-expanded="true"] .car{transform:rotate(90deg)}
+.disclose .t{font-size:12.5px;font-weight:500}
+.disclose .s{font-size:11.5px;color:var(--dim);margin-left:auto}
+.opt[hidden]{display:none}
+.opt{border-left:1px solid var(--line2);margin:4px 0 0 6px;padding-left:16px}
+
+.flow{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:8px;background:var(--panel);overflow:hidden}
+.flow .fs{flex:1;padding:11px 14px;border-right:1px solid var(--line);position:relative}
+.flow .fs:last-child{border-right:0}
+.flow .fn{font-family:var(--mono);font-size:10px;color:var(--dim)}
+.flow .ft{font-size:12.5px;font-weight:500;margin-top:2px}
+.flow .fd{font-size:11px;color:var(--dim);margin-top:2px}
+.flow .fs.gate{background:var(--amber-bg)}
+.flow .fs.gate .fn{color:var(--amber)}
+.stopnote{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:var(--muted);padding:10px 14px;border:1px solid var(--line);border-top:0;border-radius:0 0 8px 8px;margin-top:-1px;background:var(--shell)}
+.stopnote b{color:var(--text);font-weight:500}
+.stopnote .mono{color:var(--amber)}
+
+.cmds{list-style:none;margin-top:4px}
+.cmds li{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.cmds li:last-child{border-bottom:0}
+.cmds .cn{font-size:12.5px;font-weight:500;display:flex;gap:8px;align-items:center}
+.cmds .cn .req{font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.05em;border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+.cmds code{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:2px}
+.cmds li.off .cn,.cmds li.off code{opacity:.4;text-decoration:line-through}
+.tg{position:relative;width:30px;height:17px;flex:none}
+.tg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer;z-index:1}
+.tg span{position:absolute;inset:0;border-radius:9px;background:var(--line2);transition:.15s}
+.tg span::after{content:"";position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:var(--muted);transition:.15s}
+.tg input:checked+span{background:var(--text)}
+.tg input:checked+span::after{left:15px;background:#111}
+.tg input:disabled{cursor:not-allowed}
+.tg input:disabled+span{opacity:.55}
+.tg input:focus-visible+span{outline:2px solid var(--amber);outline-offset:2px}
+.pseg{display:inline-flex;border:1px solid var(--line2);border-radius:6px;overflow:hidden}
+.pseg button{border:0;background:#0B0C0D;width:36px;height:30px;font-family:var(--mono);font-size:12px;cursor:pointer;color:var(--muted);border-right:1px solid var(--line2)}
+.pseg button:last-child{border-right:0}
+.pseg button[aria-pressed="true"]{background:var(--text);color:#111;font-weight:600}
+.pol{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.pol:last-of-type{border-bottom:0}
+.pol .pn{font-size:12.5px;font-weight:500}
+.pol .pd{font-size:11px;color:var(--dim)}
+.numin{width:84px;display:flex;align-items:center;border:1px solid var(--line2);border-radius:6px;background:#0B0C0D;height:30px;padding:0 8px;gap:4px}
+.numin input{width:100%;background:none;border:0;outline:none;color:var(--text);font-family:var(--mono);font-size:12px;text-align:right}
+.numin span{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.trust{display:grid;grid-template-columns:18px 1fr;gap:10px;padding:12px;border-radius:6px;border:1px solid var(--amber-ln);background:var(--amber-bg);cursor:pointer;margin-top:12px}
+.trust.ok{border-color:var(--green-ln);background:var(--green-bg)}
+.trust input{appearance:none;width:16px;height:16px;border:1.5px solid var(--amber);border-radius:3px;margin-top:1px;display:grid;place-items:center;cursor:pointer;background:#0B0C0D}
+.trust input:checked{background:var(--green);border-color:var(--green)}
+.trust input:checked::after{content:"✓";color:#111;font-size:11px;font-weight:700;line-height:1}
+.trust .tt{font-size:12.5px;font-weight:500}
+.trust .td{font-size:11.5px;color:var(--muted);margin-top:3px}
+.ready{list-style:none;margin:12px 0 14px;display:flex;flex-direction:column;gap:5px}
+.ready li{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.ready li .g{width:14px}
+.ready li.no{color:var(--text)}
+.ready li.no .g{color:var(--amber)}
+.start{width:100%;height:40px;font-size:13.5px}
+.sticky{position:sticky;top:16px}
+
+/* ---------- screen 1 ---------- */
+.intro{display:grid;grid-template-columns:1.15fr 1fr;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.card-pad{padding:14px 16px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.issue h2{font-size:15.5px;font-weight:600;letter-spacing:-.01em;margin:8px 0 10px;line-height:1.3}
+.expect{display:grid;grid-template-columns:70px 1fr;gap:6px 10px;font-size:12.5px}
+.expect dt{color:var(--dim);font-size:11.5px;padding-top:1px}
+.expect code{font-family:var(--mono);font-size:11.5px;background:var(--panel2);border:1px solid var(--line);padding:0 5px;border-radius:3px}
+.out{font-family:var(--mono);font-size:11.5px;line-height:1.65;background:#0A0B0C;border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-top:10px;color:var(--muted)}
+.out .f{color:var(--red)} .out .p{color:var(--green)} .out .w{color:var(--text)} .out .d{color:var(--dim)} .out .a{color:var(--amber)}
+.note{font-size:11.5px;color:var(--dim);margin-top:8px}
+.sec-h{display:flex;align-items:flex-end;justify-content:space-between;margin:22px 0 10px}
+.sec-h h3{font-size:14px;font-weight:600;letter-spacing:-.01em}
+.sec-h p{color:var(--dim);font-size:12px;margin-top:2px}
+.legend{display:flex;gap:14px;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.legend span{display:flex;align-items:center;gap:5px}
+.bench{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cand{display:flex;flex-direction:column}
+.cand-h{padding:14px 14px 12px;border-bottom:1px solid var(--line)}
+.cand-top{display:flex;gap:10px;align-items:flex-start}
+.tile{width:26px;height:26px;flex:none;border:1px solid var(--line2);border-radius:5px;display:grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:12.5px;background:var(--panel2)}
+.cand-t{font-weight:600;font-size:13px;line-height:1.3}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line2);border-radius:3px;padding:0 5px;margin-top:5px}
+.path{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gate{margin:10px 14px 0;padding:8px 10px;border-radius:6px;border:1px solid var(--red-ln);background:var(--red-bg);color:var(--red);font-size:11.5px;line-height:1.4}
+.gate b{font-weight:600}
+.gate span{color:var(--muted);display:block;margin-top:2px}
+.checks{list-style:none;padding:8px 6px;flex:1}
+.checks li{display:grid;grid-template-columns:18px 1fr auto;align-items:center;gap:8px;padding:7px 8px;border-radius:5px;font-size:12.5px;position:relative}
+.checks li.run{background:var(--amber-bg)}
+.checks li.run::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--amber);border-radius:2px}
+.checks li.fail{background:var(--red-bg)}
+.checks .nm{color:var(--text)}
+.checks li.q .nm{color:var(--dim)}
+.checks .rs{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right}
+.checks li.run .rs{color:var(--amber)}
+.checks li.fail .rs{color:var(--red)}
+.g{font-family:var(--mono);font-size:11px;text-align:center;line-height:1}
+.g.pass{color:var(--green)} .g.fail{color:var(--red)} .g.q{color:var(--dim)}
+.spin{width:10px;height:10px;border:1.5px solid var(--amber-ln);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.prog{grid-column:2/4;height:2px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:2px}
+.prog i{display:block;height:100%;background:var(--amber);transition:width .4s}
+.cand-f{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--dim)}
+.add{color:var(--green)} .del{color:var(--red)}
+.link{color:var(--text);text-decoration:none;border-bottom:1px solid var(--line2);cursor:pointer;background:none;border-top:0;border-left:0;border-right:0;padding:0;font-family:var(--sans);font-size:11.5px}
+.link:hover{border-bottom-color:var(--text)}
+.term{margin-top:12px;background:#0A0B0C;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.term-h{display:flex;align-items:center;border-bottom:1px solid var(--line);padding:0 8px 0 4px;height:36px}
+.term-tabs{display:flex;height:100%}
+.term-tabs button{border:0;background:none;cursor:pointer;padding:0 12px;font-family:var(--mono);font-size:11px;color:var(--dim);display:flex;align-items:center;gap:6px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.term-tabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--text)}
+.term-b{font-family:var(--mono);font-size:11.5px;line-height:1.7;padding:10px 14px;height:168px;overflow:auto;color:var(--muted)}
+.term.collapsed .term-b{display:none}
+.term-b div{white-space:pre}
+.cursor{display:inline-block;width:6px;height:12px;background:var(--muted);vertical-align:-2px;animation:pulse 1s steps(2) infinite}
+
+/* ---------- screen 2 ---------- */
+.head2{display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
+.head2 h2{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.head2 p{color:var(--muted);font-size:13px;margin-top:4px;max-width:640px}
+.head2 p b{color:var(--text);font-weight:500}
+.actions{display:flex;gap:8px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--line);border-radius:8px;margin-top:16px;background:var(--panel)}
+.stat{padding:11px 14px;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat .v{font-family:var(--mono);font-size:19px;font-weight:500;margin-top:3px;letter-spacing:-.02em}
+.stat .v small{font-size:11px;color:var(--dim);font-weight:400;margin-left:4px}
+.paper{background:var(--paper);color:var(--ink);border-radius:8px;margin-top:14px;overflow:hidden}
+.mx{width:100%;border-collapse:collapse;table-layout:fixed}
+.mx th,.mx td{text-align:left;vertical-align:middle;border-bottom:1px solid var(--pline);padding:9px 14px}
+.mx col.c0{width:228px} .mx col.cb{width:150px}
+.mx td.rowh{font-size:12.5px;color:var(--ink);font-weight:500}
+.mx td.rowh small{display:block;font-weight:400;font-size:11px;color:var(--ink3)}
+.mx thead th{vertical-align:top;padding:14px;border-bottom:1px solid var(--ink3);font-weight:400;position:relative}
+.mx thead th.corner{vertical-align:bottom}
+.mx .colh{cursor:pointer;transition:background .15s}
+.mx .colh:hover{background:rgba(0,0,0,.025)}
+.mx .sel{background:var(--paper2)}
+.mx thead th.sel::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--ink)}
+.ptile{width:24px;height:24px;border:1.5px solid var(--ink);border-radius:4px;display:inline-grid;place-items:center;font-family:var(--mono);font-weight:600;font-size:12px}
+.colh .ct{font-weight:600;font-size:13px;margin-top:8px;line-height:1.3;color:var(--ink)}
+.colh .cl{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-top:3px}
+.verdict{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.07em;padding:2px 7px;border-radius:3px;border:1.5px solid;margin-top:10px}
+.verdict.ok{color:var(--pgreen);border-color:var(--pgreen)}
+.verdict.no{color:var(--pred);border-color:var(--pred)}
+.reason{display:block;font-size:11.5px;color:var(--pred);margin-top:6px;line-height:1.35}
+button.reason{background:none;border:0;border-bottom:1px solid currentColor;cursor:pointer;padding:0;font-family:var(--sans)}
+.rej{color:var(--ink2)!important}
+.mx .grp td{background:#EAE5D9;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);padding:6px 14px;border-bottom:1px solid var(--pline)}
+.mx .grp td span{text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:11px;color:var(--ink3);margin-left:8px}
+.cell{font-family:var(--mono);font-size:12px;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.cell .gl{width:14px;text-align:center;font-weight:600}
+.cell.pass .gl{color:var(--pgreen)}
+.cell.fail{color:var(--pred);font-weight:500}
+.cell.exp{color:var(--ink2)}
+.cell.na{color:var(--ink3)}
+.cell small{font-family:var(--sans);font-size:11px;color:var(--ink3);font-weight:400}
+.cell.fail small{color:var(--pred)}
+.bar{display:flex;height:6px;width:100%;max-width:120px;margin-top:5px;border-radius:1px;overflow:hidden;background:rgba(0,0,0,.05)}
+.bar .ba{background:var(--pgreen);opacity:.75} .bar .bd{background:var(--pred);opacity:.75}
+.foot-note{display:flex;justify-content:space-between;padding:10px 14px;font-size:11.5px;color:var(--ink2);background:#EAE5D9}
+.foot-note b{color:var(--ink);font-weight:600}
+.detail{display:grid;grid-template-columns:360px 1fr;margin-top:14px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.d-left{padding:16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.d-left h3{font-size:14px;font-weight:600;display:flex;gap:10px;align-items:center;letter-spacing:-.01em}
+.d-left p{color:var(--muted);font-size:12.5px;margin-top:6px}
+.tradeoffs{list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.tradeoffs li{display:grid;grid-template-columns:14px 1fr;gap:6px;color:var(--muted)}
+.tradeoffs .pm{font-family:var(--mono);color:var(--text)}
+.files{list-style:none;margin-top:8px;font-family:var(--mono);font-size:11.5px}
+.files li{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed var(--line)}
+.files li span:first-child{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:10px}
+.failbox{border:1px solid var(--red-ln);background:var(--red-bg);border-radius:6px;padding:10px 12px}
+.failbox .t{color:var(--red);font-weight:600;font-size:12px}
+.checkout{margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.cmd{display:flex;align-items:center;gap:8px;background:#0A0B0C;border:1px solid var(--line);border-radius:6px;padding:0 4px 0 10px;height:34px;margin-top:8px}
+.cmd code{font-family:var(--mono);font-size:11.5px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.cmd code::before{content:"$ ";color:var(--dim)}
+.d-right{min-width:0;display:flex;flex-direction:column}
+.d-tabs{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--line);padding:0 10px;height:40px}
+.d-tabs .ft{font-family:var(--mono);font-size:11.5px;color:var(--text);padding:5px 10px;border-radius:5px;background:var(--panel2);border:1px solid var(--line2)}
+.d-tabs .more{font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:8px}
+.diff{font-family:var(--mono);font-size:12px;line-height:1.7;background:#0B0C0D;flex:1;overflow:auto;padding:6px 0}
+.diff .ln{display:grid;grid-template-columns:44px 44px 18px 1fr;white-space:pre}
+.diff .ln span:nth-child(-n+2){color:#4B4944;text-align:right;padding-right:10px;user-select:none}
+.diff .hk{color:#7E8BA8;background:rgba(126,139,168,.07);padding:2px 0}
+.diff .ad{background:rgba(139,187,142,.10)} .diff .ad span:nth-child(3),.diff .ad span:nth-child(4){color:#B9D8BA}
+.diff .dl{background:rgba(228,112,95,.10)} .diff .dl span:nth-child(3),.diff .dl span:nth-child(4){color:#EBAA9F}
+.diff .cx span:nth-child(4){color:var(--muted)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,20px);background:var(--text);color:#111;font-size:12.5px;font-weight:500;padding:8px 14px;border-radius:6px;opacity:0;transition:.2s;pointer-events:none;z-index:10}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <h1><b>PatchBench</b> · UI mockups · Shipyard</h1>
+  <div class="seg" role="tablist" aria-label="Mockup screens">
+    <button role="tab" aria-selected="true" data-screen="s0"><span class="n">01</span>New benchmark</button>
+    <button role="tab" aria-selected="false" data-screen="s1"><span class="n">02</span>Live bench</button>
+    <button role="tab" aria-selected="false" data-screen="s2"><span class="n">03</span>Evidence matrix</button>
+  </div>
+</div>
+
+<div class="stage">
+<div class="app">
+
+<!-- =================== SCREEN 0 : NEW BENCHMARK =================== -->
+<section class="screen" id="s0">
+  <header class="appbar">
+    <div class="brand"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="6" y="2" width="6" height="5" rx="1" stroke="#A39E94" stroke-width="1.5"/><path d="M1.5 9.5h15M4 9.5V16M14 9.5V16" stroke="#ECE7DD" stroke-width="1.5" stroke-linecap="round"/></svg>PatchBench</div>
+    <nav class="crumbs"><span>Benchmarks</span><span class="sep">/</span><span class="cur">New</span></nav>
+    <span class="pill neutral">DRAFT</span>
+    <div class="spacer"></div>
+    <span class="mono" style="font-size:11px;color:var(--dim)">local-first · repository is never uploaded</span>
+    <button class="btn ghost">Discard</button>
+  </header>
+  <div class="body">
+    <aside class="rail">
+      <div>
+        <div class="label">Recent runs</div>
+        <ul class="runs">
+          <li data-go="s2"><div class="r1"><span class="rid">7f3a·0926</span><span class="pill green">COMPLETE</span></div><div class="rrepo">auth-expiry-bug</div><div class="rwhy">2 eligible · 1 rejected</div></li>
+          <li><div class="r1"><span class="rid">5c02·0925</span><span class="pill amber">UNVERIFIED</span></div><div class="rrepo">invoice-rounding</div><div class="rwhy">test passed on baseline</div></li>
+          <li><div class="r1"><span class="rid">91be·0925</span><span class="pill red">BLOCKED</span></div><div class="rrepo">cart-service</div><div class="rwhy">baseline: 3 tests already failing</div></li>
+          <li><div class="r1"><span class="rid">0d47·0924</span><span class="pill green">COMPLETE</span></div><div class="rrepo">auth-expiry-bug</div><div class="rwhy">1 eligible · 2 rejected</div></li>
+        </ul>
+      </div>
+      <div class="rail-foot">
+        <div class="label">Workspace</div>
+        <dl class="kv"><dt>Worktrees on disk</dt><dd>6 · 184 MB</dd><dt>Artifacts</dt><dd>.patchbench/runs</dd></dl>
+        <button class="btn ghost" style="width:100%;margin-top:10px;height:28px;font-size:12px">Clean up old worktrees</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="head0">
+        <h2>New benchmark</h2>
+        <p>Point PatchBench at a repository and describe the defect. <b>Nothing is patched until the bug is reproduced as a failing test.</b></p>
+      </div>
+
+      <div class="nb">
+        <!-- left column -->
+        <div class="nb-col">
+          <section class="card">
+            <div class="step-h"><span class="stepn ok" id="n1">✓</span><h3>Repository</h3><span class="sub">local git · node.js / typescript</span></div>
+            <div class="step-b">
+              <div class="field">
+                <label for="repo">Repository path <span class="req">REQUIRED</span></label>
+                <div class="row"><input id="repo" class="input mono" value="/Users/ada/dev/fixtures/auth-expiry-bug" spellcheck="false"><button class="btn" style="height:37px">Browse…</button></div>
+                <div class="chips" id="repoChecks">
+                  <span class="chip"><span class="gl">✓</span>git repository</span>
+                  <span class="chip"><span class="gl">✓</span>working tree clean</span>
+                  <span class="chip"><span class="gl">✓</span>typescript 5.5</span>
+                  <span class="chip"><span class="gl">✓</span>pnpm 9.12 · lockfile</span>
+                  <span class="chip"><span class="gl">✓</span>node 20.17</span>
+                </div>
+              </div>
+              <div class="grid2">
+                <div class="field"><label for="ref">Base ref</label>
+                  <select id="ref" class="input mono"><option>main</option><option>release/1.4</option><option>HEAD (detached)</option></select></div>
+                <div class="field"><span class="flabel">Baseline commit</span>
+                  <div class="readonly"><b>4c1e9a2</b><span>fix: session rotation clock skew</span><span style="margin-left:auto;color:var(--dim)">2h ago</span></div></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="step-h"><span class="stepn" id="n2">2</span><h3>Defect</h3><span class="sub">bob turns this into the regression test</span></div>
+            <div class="step-b">
+              <div class="field">
+                <label for="title">Title <span class="req">REQUIRED</span><span class="cnt" id="titleCnt"></span></label>
+                <input id="title" class="input req-f" maxlength="120" value="Expired refresh token returns HTTP 500 instead of documented 401">
+              </div>
+              <div class="field">
+                <label for="desc">What's happening <span class="req">REQUIRED</span></label>
+                <textarea id="desc" class="input req-f" rows="3">When a client calls POST /auth/refresh with a refresh token past its expiry, the API responds 500 internal_error. Logs show TokenExpiredError thrown from AuthService.refresh() and never handled. Mobile clients treat 500 as an outage and retry instead of sending the user to sign in.</textarea>
+              </div>
+              <div class="field">
+                <label for="exp">Expected behavior <span class="req">REQUIRED</span></label>
+                <textarea id="exp" class="input req-f mono" rows="2">POST /auth/refresh with an expired token responds 401 with body {"error":"token_expired"}. Other auth responses are unchanged.</textarea>
+                <span class="hint">Write it as something a test could assert: a status, a return value, a thrown error. Vague expectations produce vague tests.</span>
+              </div>
+
+              <button class="disclose" id="discl" aria-expanded="false" aria-controls="opt">
+                <span class="car">›</span><span class="t">Add evidence</span><span class="s" id="optSum">2 of 5 optional fields filled</span>
+              </button>
+              <div class="opt" id="opt" hidden>
+                <div class="field"><label for="act">Actual behavior</label>
+                  <textarea id="act" class="input mono" rows="1">500 {"error":"internal_error"}</textarea></div>
+                <div class="field"><label for="trace">Stack trace or logs</label>
+                  <textarea id="trace" class="input mono" rows="4" style="font-size:11.5px">TokenExpiredError: refresh token expired (sub=usr_19c)
+    at AuthService.refresh (src/services/authService.ts:21:13)
+    at async src/routes/auth.ts:42:19</textarea>
+                  <span class="hint">Secrets and tokens are redacted before anything reaches Bob.</span></div>
+                <div class="field"><label for="files">Relevant files</label>
+                  <input id="files" class="input mono" placeholder="src/routes/auth.ts, src/services/authService.ts"></div>
+                <div class="grid2" style="grid-template-columns:1fr 1fr">
+                  <div class="field"><label for="hints">Reproduction hints</label>
+                    <input id="hints" class="input" placeholder="e.g. freeze clock past token exp"></div>
+                  <div class="field"><label for="fcmd">Failing command</label>
+                    <input id="fcmd" class="input mono" placeholder="pnpm vitest run tests/auth"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div>
+            <div class="flow">
+              <div class="fs"><div class="fn">01</div><div class="ft">Baseline</div><div class="fd">record SHA, run all checks</div></div>
+              <div class="fs gate"><div class="fn">02 · GATE</div><div class="ft">Reproduce</div><div class="fd">test must fail on baseline</div></div>
+              <div class="fs"><div class="fn">03</div><div class="ft">Strategize</div><div class="fd">3 distinct repair layers</div></div>
+              <div class="fs"><div class="fn">04</div><div class="ft">Patch</div><div class="fd">1 isolated worktree each</div></div>
+              <div class="fs"><div class="fn">05</div><div class="ft">Verify</div><div class="fd">identical checks for all</div></div>
+            </div>
+            <div class="stopnote"><span class="g" style="color:var(--amber)">!</span><span>If the regression test doesn't fail on the untouched baseline, the run stops as <span class="mono">UNVERIFIED</span>. <b>No candidates are generated from an unreproduced bug.</b> If the baseline is already failing, it stops as <span class="mono">BLOCKED_BASELINE</span>.</span></div>
+          </div>
+        </div>
+
+        <!-- right column -->
+        <div class="nb-col sticky">
+          <section class="card">
+            <div class="step-h"><span class="stepn ok">✓</span><h3>Verification commands</h3><span class="sub">from package.json</span></div>
+            <div class="step-b" style="padding-top:0">
+              <ul class="cmds" id="cmds">
+                <li><div><div class="cn">Tests <span class="req">REQUIRED</span></div><code>pnpm vitest run</code></div><label class="tg"><input type="checkbox" checked disabled aria-label="Tests (required)"><span></span></label></li>
+                <li><div><div class="cn">Typecheck</div><code>pnpm tsc --noEmit</code></div><label class="tg"><input type="checkbox" checked aria-label="Typecheck"><span></span></label></li>
+                <li><div><div class="cn">Lint</div><code>pnpm eslint . --max-warnings=0</code></div><label class="tg"><input type="checkbox" checked aria-label="Lint"><span></span></label></li>
+                <li><div><div class="cn">Production build</div><code>pnpm build</code></div><label class="tg"><input type="checkbox" checked aria-label="Production build"><span></span></label></li>
+              </ul>
+              <p class="hint">Only these commands run. Every candidate gets exactly the same set.</p>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="step-h"><span class="stepn ok">✓</span><h3>Run policy</h3><span class="sub">defaults</span></div>
+            <div class="step-b" style="padding-top:2px">
+              <div class="pol"><div><div class="pn">Candidates</div><div class="pd">independent strategies</div></div>
+                <div class="pseg" id="ncand"><button aria-pressed="false">1</button><button aria-pressed="false">2</button><button aria-pressed="true">3</button></div></div>
+              <div class="pol"><div><div class="pn">Timeout</div><div class="pd">per command</div></div>
+                <div class="numin"><input value="120" aria-label="Timeout seconds"><span>s</span></div></div>
+              <div class="pol"><div><div class="pn">Bob turn cap</div><div class="pd">per task</div></div>
+                <div class="numin"><input value="15" aria-label="Turn cap"><span>turns</span></div></div>
+              <div class="pol"><div><div class="pn">Bob cost cap</div><div class="pd">whole run</div></div>
+                <div class="numin"><input value="4.0" aria-label="Cost cap"><span>cap</span></div></div>
+              <div style="margin-top:10px"><div class="flabel" style="font-size:12px">Never sent to Bob</div>
+                <div class="chips" style="margin-top:6px"><span class="chip x">.git</span><span class="chip x">node_modules</span><span class="chip x">.env*</span><span class="chip x">dist</span><span class="chip x">*.pem</span><button class="chip" style="cursor:pointer;background:none">+ add</button></div></div>
+            </div>
+          </section>
+
+          <section class="card card-pad">
+            <label class="trust" id="trustBox">
+              <input type="checkbox" id="trust">
+              <div><div class="tt">I trust this repository to run its own scripts</div>
+                <div class="td">PatchBench will execute the 4 commands above in 4 working copies on this machine. There's no container sandbox in this version.</div></div>
+            </label>
+            <ul class="ready" id="ready"></ul>
+            <button class="btn primary start" id="startBtn" disabled>Start benchmark <span class="kbd">⌘ ↵</span></button>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- =================== SCREEN 1 : LIVE BENCH =================== -->
+<section class="screen" id="s1" hidden>
+  <header class="appbar">
+    <div class="brand"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="6" y="2" width="6" height="5" rx="1" stroke="#F0A63A" stroke-width="1.5"/><path d="M1.5 9.5h15M4 9.5V16M14 9.5V16" stroke="#ECE7DD" stroke-width="1.5" stroke-linecap="round"/></svg>PatchBench</div>
+    <nav class="crumbs"><span>auth-expiry-bug</span><span class="sep">/</span><span class="cur mono">run 7f3a·0926</span></nav>
+    <span class="pill amber"><span class="dot pulse"></span>VERIFYING</span>
+    <div class="spacer"></div>
+    <span class="clock">elapsed <b id="elapsed">05:48</b></span>
+    <button class="btn ghost danger">Cancel run</button>
+  </header>
+  <div class="body">
+    <aside class="rail" id="rail1"></aside>
+    <main class="main">
+      <div class="intro">
+        <article class="card card-pad issue">
+          <div class="card-h"><span class="label">Bug report</span><span class="mono" style="font-size:11px;color:var(--dim)">submitted 17:26</span></div>
+          <h2>Expired refresh token returns HTTP 500 instead of documented 401</h2>
+          <dl class="expect">
+            <dt>Expected</dt><dd><code>POST /auth/refresh</code> with an expired token responds <code>401 {"error":"token_expired"}</code></dd>
+            <dt>Actual</dt><dd>Unhandled <code>TokenExpiredError</code> bubbles up; client receives <code>500 internal_error</code></dd>
+          </dl>
+        </article>
+        <article class="card card-pad">
+          <div class="card-h"><span class="label">Reproduction gate</span><span class="pill green">✓ REPRODUCED</span></div>
+          <div class="out">
+<div class="d">tests/regression/refresh-expired.test.ts</div>
+<div><span class="f">✕</span> <span class="w">POST /auth/refresh › responds 401 when token is expired</span></div>
+<div>  <span class="f">AssertionError: expected 401, received 500</span></div>
+<div class="d">  at refresh-expired.test.ts:18:32</div>
+          </div>
+          <p class="note">Fails on untouched baseline <span class="mono">4c1e9a2</span> for the expected reason. Injected identically into all 3 worktrees.</p>
+        </article>
+      </div>
+
+      <div class="sec-h">
+        <div><h3>Candidate bench</h3><p>3 isolated worktrees from <span class="mono">4c1e9a2</span> · same lockfile, env, and verification commands</p></div>
+        <div class="legend"><span><span class="g pass">✓</span>pass</span><span><span class="g fail">✕</span>fail</span><span><span class="spin" style="margin:0"></span>running</span><span><span class="g q">○</span>queued</span></div>
+      </div>
+
+      <div class="bench">
+        <article class="card cand">
+          <div class="cand-h">
+            <div class="cand-top"><div class="tile">A</div><div><div class="cand-t">Map expiry at the route boundary</div><span class="tag">API boundary</span></div></div>
+            <div class="path">.patchbench/worktrees/7f3a/candidate-a</div>
+          </div>
+          <ul class="checks">
+            <li><span class="g pass">✓</span><span class="nm">Regression test</span><span class="rs">pass · 0.8s</span></li>
+            <li class="run"><div class="spin"></div><span class="nm">Existing tests</span><span class="rs" id="aCount">118/142</span><div class="prog"><i id="aProg" style="width:83%"></i></div></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Typecheck</span><span class="rs">queued</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Lint</span><span class="rs">queued</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Production build</span><span class="rs">queued</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Change surface</span><span class="rs">queued</span></li>
+          </ul>
+          <div class="cand-f"><span><span class="add">+11</span> <span class="del">−2</span> · 2 files</span><button class="link">View diff →</button></div>
+        </article>
+        <article class="card cand">
+          <div class="cand-h">
+            <div class="cand-top"><div class="tile">B</div><div><div class="cand-t">Global handler maps AuthError → 401</div><span class="tag">Error middleware</span></div></div>
+            <div class="path">.patchbench/worktrees/7f3a/candidate-b</div>
+          </div>
+          <div class="gate"><b>✕ Hard gate failed:</b> 2 previously passing tests now fail.<span>Rejection is locked in. Remaining checks continue for a complete record.</span></div>
+          <ul class="checks">
+            <li><span class="g pass">✓</span><span class="nm">Regression test</span><span class="rs">pass · 0.9s</span></li>
+            <li class="fail"><span class="g fail">✕</span><span class="nm">Existing tests</span><span class="rs">140/142 · 2 new</span></li>
+            <li class="run"><div class="spin"></div><span class="nm">Typecheck</span><span class="rs" id="bT">4.1s</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Lint</span><span class="rs">queued</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Production build</span><span class="rs">queued</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Change surface</span><span class="rs">queued</span></li>
+          </ul>
+          <div class="cand-f"><span><span class="add">+64</span> <span class="del">−11</span> · 7 files</span><button class="link">View failures →</button></div>
+        </article>
+        <article class="card cand">
+          <div class="cand-h">
+            <div class="cand-top"><div class="tile">C</div><div><div class="cand-t">Typed Result from AuthService.refresh()</div><span class="tag">Service layer</span></div></div>
+            <div class="path">.patchbench/worktrees/7f3a/candidate-c</div>
+          </div>
+          <ul class="checks">
+            <li><span class="g pass">✓</span><span class="nm">Regression test</span><span class="rs">pass · 0.8s</span></li>
+            <li><span class="g pass">✓</span><span class="nm">Existing tests</span><span class="rs">142/142 · 21.3s</span></li>
+            <li><span class="g pass">✓</span><span class="nm">Typecheck</span><span class="rs">pass · 6.2s</span></li>
+            <li class="run"><div class="spin"></div><span class="nm">Lint</span><span class="rs" id="cT">2.7s</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Production build</span><span class="rs">queued</span></li>
+            <li class="q"><span class="g q">○</span><span class="nm">Change surface</span><span class="rs">queued</span></li>
+          </ul>
+          <div class="cand-f"><span><span class="add">+41</span> <span class="del">−9</span> · 3 files</span><button class="link">View diff →</button></div>
+        </article>
+      </div>
+
+      <div class="term" id="term">
+        <div class="term-h">
+          <div class="term-tabs" role="tablist">
+            <button role="tab" aria-selected="true" data-log="a"><span class="spin" style="margin:0;width:8px;height:8px"></span>candidate-a</button>
+            <button role="tab" aria-selected="false" data-log="b"><span class="g fail">✕</span>candidate-b</button>
+            <button role="tab" aria-selected="false" data-log="c"><span class="spin" style="margin:0;width:8px;height:8px"></span>candidate-c</button>
+          </div>
+          <div class="spacer"></div>
+          <span class="mono" style="font-size:10.5px;color:var(--dim);margin-right:10px">secrets redacted · timeout 120s/cmd</span>
+          <button class="btn ghost" id="collapse" style="height:24px;font-size:11.5px">Collapse</button>
+        </div>
+        <div class="term-b" id="log"></div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- =================== SCREEN 2 : EVIDENCE MATRIX =================== -->
+<section class="screen" id="s2" hidden>
+  <header class="appbar">
+    <div class="brand"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="6" y="2" width="6" height="5" rx="1" stroke="#8BBB8E" stroke-width="1.5"/><path d="M1.5 9.5h15M4 9.5V16M14 9.5V16" stroke="#ECE7DD" stroke-width="1.5" stroke-linecap="round"/></svg>PatchBench</div>
+    <nav class="crumbs"><span>auth-expiry-bug</span><span class="sep">/</span><span class="cur mono">run 7f3a·0926</span></nav>
+    <span class="pill green">✓ COMPLETE</span>
+    <div class="spacer"></div>
+    <span class="clock">wall time <b>06:51</b></span>
+    <button class="btn ghost" data-go="s0">New benchmark <span class="kbd">N</span></button>
+  </header>
+  <div class="body">
+    <aside class="rail" id="rail2"></aside>
+    <main class="main">
+      <div class="head2">
+        <div>
+          <h2>Evidence matrix</h2>
+          <p>Three independent repairs ran against identical conditions. <b>Candidate B was rejected automatically</b> for breaking two previously passing tests. Two candidates remain eligible. The choice between them is yours.</p>
+        </div>
+        <div class="actions">
+          <button class="btn" data-toast="run-7f3a.json copied">Copy run JSON</button>
+          <button class="btn" data-toast="Report exported to .patchbench/runs/7f3a/report.md">Export report (.md)</button>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="label">Candidates</div><div class="v">3</div></div>
+        <div class="stat"><div class="label">Eligible</div><div class="v">2</div></div>
+        <div class="stat"><div class="label">Rejected</div><div class="v">1<small>auto</small></div></div>
+        <div class="stat"><div class="label">Checks run</div><div class="v">18<small>/18</small></div></div>
+        <div class="stat"><div class="label">Regressions caught</div><div class="v">2</div></div>
+        <div class="stat"><div class="label">Verification</div><div class="v">02:17<small>parallel</small></div></div>
+      </div>
+      <div class="paper">
+        <table class="mx" id="matrix"></table>
+        <div class="foot-note"><span><b>No composite score.</b> Hard gates reject; everything else is shown, never weighted.</span><span class="mono" style="font-size:11px">base 4c1e9a2 · pnpm-lock 9e21c0 · node 20.17</span></div>
+      </div>
+      <div class="detail" id="detail"></div>
+    </main>
+  </div>
+</section>
+
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- navigation ---------- */
+function show(id){
+  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-selected',x.dataset.screen===id));
+  document.querySelectorAll('.screen').forEach(s=>s.hidden=s.id!==id);
+  window.scrollTo({top:0});
+}
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>show(b.dataset.screen));
+document.querySelectorAll('[data-go]').forEach(el=>el.addEventListener('click',()=>show(el.dataset.go)));
+
+/* ---------- screen 0 : form logic ---------- */
+const $=id=>document.getElementById(id);
+const opt=$('opt'),discl=$('discl');
+discl.onclick=()=>{const o=opt.hidden;opt.hidden=!o;discl.setAttribute('aria-expanded',o)};
+const optIds=['act','trace','files','hints','fcmd'];
+function optCount(){const n=optIds.filter(i=>$(i).value.trim()).length;$('optSum').textContent=`${n} of 5 optional fields filled`}
+optIds.forEach(i=>$(i).addEventListener('input',optCount));optCount();
+
+document.querySelectorAll('#ncand button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#ncand button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+});
+document.querySelectorAll('#cmds input:not(:disabled)').forEach(c=>c.onchange=()=>c.closest('li').classList.toggle('off',!c.checked));
+
+function validate(){
+  const repoOk=$('repo').value.trim().length>1;
+  const t=$('title').value.trim(),d=$('desc').value.trim(),e=$('exp').value.trim(),tr=$('trust').checked;
+  $('titleCnt').textContent=`${$('title').value.length}/120`;
+  ['title','desc','exp'].forEach(i=>$(i).classList.toggle('err',!$(i).value.trim()));
+  $('n2').className='stepn'+(t&&d&&e?' ok':'');$('n2').textContent=t&&d&&e?'✓':'2';
+  $('n1').className='stepn'+(repoOk?' ok':'');$('n1').textContent=repoOk?'✓':'1';
+  $('trustBox').classList.toggle('ok',tr);
+  const items=[[repoOk,'Repository valid, baseline 4c1e9a2'],[!!t,'Bug title'],[!!d,'Description'],[!!e,'Expected behavior'],[tr,'Script execution acknowledged']];
+  $('ready').innerHTML=items.map(([ok,l])=>`<li class="${ok?'':'no'}"><span class="g ${ok?'pass':''}">${ok?'✓':'○'}</span>${l}</li>`).join('');
+  const all=items.every(i=>i[0]);
+  $('startBtn').disabled=!all;
+  return all;
+}
+['repo','title','desc','exp','trust'].forEach(i=>$(i).addEventListener('input',validate));
+$('trust').addEventListener('change',validate);
+validate();
+function start(){if(!validate())return;toast('Run 7f3a·0926 created · baselining');setTimeout(()=>show('s1'),500)}
+$('startBtn').onclick=start;
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&!$('s0').hidden)start()});
+
+/* ---------- rail (screens 1 & 2) ---------- */
+function rail(final){
+  const st=[
+    ['Baseline','142/142 · tsc, lint, build ok','00:14'],
+    ['Reproduce','REPRODUCED · 1 test','00:52'],
+    ['Strategies','3 distinct repair layers','00:38'],
+    ['Prepare','3 worktrees @ 4c1e9a2','00:03'],
+    ['Patch','A · B · C implemented','02:47'],
+    ['Verify',final?'18/18 checks':'6/18 checks · running',final?'02:17':'—'],
+    ['Complete',final?'2 eligible · 1 rejected':'awaiting evidence','']
+  ];
+  const items=st.map((s,i)=>{
+    const cls=final?'done':(i<5?'done':i===5?'active':'todo');
+    return `<li class="${cls}"><span class="tl-ico">${cls==='done'?'✓':''}</span><div><div class="tl-name">${s[0]}</div><div class="tl-sub">${s[1]}</div></div><span class="tl-time">${s[2]}</span></li>`;
+  }).join('');
+  return `
+  <div><div class="label">Run</div>
+    <dl class="kv"><dt>Repo</dt><dd title="~/dev/fixtures/auth-expiry-bug">~/dev/fixtures/auth-expiry-bug</dd>
+    <dt>Branch</dt><dd>main @ 4c1e9a2</dd><dt>Package mgr</dt><dd>pnpm 9.12</dd><dt>Runtime</dt><dd>node 20.17</dd></dl></div>
+  <div><div class="label">Pipeline</div><ol class="timeline">${items}</ol></div>
+  <div class="rail-foot"><div class="label">IBM Bob · run budget</div>
+    <dl class="kv"><dt>Tasks</dt><dd>5</dd><dt>Turns</dt><dd>41 / 75 cap</dd></dl>
+    <div class="meter"><i style="width:55%"></i></div>
+    <dl class="kv"><dt>Cost</dt><dd>2.4 / 4.0 cap</dd></dl>
+    <div class="meter"><i style="width:60%"></i></div>
+  </div>`;
+}
+$('rail1').innerHTML=rail(false);
+$('rail2').innerHTML=rail(true);
+
+/* ---------- live ticking (screen 1) ---------- */
+let sec=348,aN=118,bT=4.1,cT=2.7;
+const fmt=s=>String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+setInterval(()=>{sec++;$('elapsed').textContent=fmt(sec)},1000);
+setInterval(()=>{
+  if(aN<141){aN++;$('aCount').textContent=aN+'/142';$('aProg').style.width=(aN/142*100)+'%';}
+  bT+=.1;cT+=.1;$('bT').textContent=bT.toFixed(1)+'s';$('cT').textContent=cT.toFixed(1)+'s';
+},700);
+
+/* ---------- logs ---------- */
+const logs={
+ a:['<span class="d">$</span> <span class="w">pnpm vitest run</span>',' <span class="a">RUN</span>  v2.1.3 .patchbench/worktrees/7f3a/candidate-a',' <span class="p">✓</span> tests/regression/refresh-expired.test.ts <span class="d">(1)</span>',' <span class="p">✓</span> tests/auth/login.test.ts <span class="d">(14)</span>',' <span class="p">✓</span> tests/auth/logout.test.ts <span class="d">(6)</span>',' <span class="p">✓</span> tests/auth/refresh.test.ts <span class="d">(11)</span>',' <span class="p">✓</span> tests/auth/me.test.ts <span class="d">(9)</span>',' <span class="p">✓</span> tests/sessions/rotate.test.ts <span class="d">(17)</span>'],
+ b:['<span class="d">$</span> <span class="w">pnpm vitest run</span>',' <span class="f">✕</span> tests/auth/refresh.test.ts &gt; revoked token &gt; responds 403','   <span class="f">AssertionError: expected 403, received 401</span>',' <span class="f">✕</span> tests/auth/me.test.ts &gt; suspended account &gt; responds 403','   <span class="f">AssertionError: expected 403, received 401</span>',' <span class="w">Tests</span>  <span class="f">2 failed</span> | <span class="p">140 passed</span> <span class="d">(142)</span>',' <span class="d">baseline: 142 passed · 2 new failures attributed to candidate</span>','','<span class="d">$</span> <span class="w">pnpm tsc --noEmit</span>'],
+ c:['<span class="d">$</span> <span class="w">pnpm vitest run</span>',' <span class="w">Tests</span>  <span class="p">142 passed</span> <span class="d">(142) · 21.3s</span>','<span class="d">$</span> <span class="w">pnpm tsc --noEmit</span>',' <span class="p">✓</span> no type errors <span class="d">· 6.2s</span>','<span class="d">$</span> <span class="w">pnpm eslint . --max-warnings=0</span>']
+};
+const stream=[' <span class="p">✓</span> tests/sessions/expiry.test.ts <span class="d">(8)</span>',' <span class="p">✓</span> tests/tokens/verifier.test.ts <span class="d">(12)</span>',' <span class="p">✓</span> tests/api/health.test.ts <span class="d">(3)</span>',' <span class="p">✓</span> tests/users/profile.test.ts <span class="d">(10)</span>',' <span class="p">✓</span> tests/middleware/rate-limit.test.ts <span class="d">(7)</span>'];
+let cur='a',si=0;
+const logEl=$('log');
+function drawLog(){logEl.innerHTML=logs[cur].map(l=>`<div>${l}</div>`).join('')+'<div><span class="cursor"></span></div>';logEl.scrollTop=1e5}
+drawLog();
+setInterval(()=>{if(si<stream.length){logs.a.push(stream[si++]);if(cur==='a')drawLog();}},2600);
+document.querySelectorAll('.term-tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.term-tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));cur=b.dataset.log;drawLog();
+});
+$('collapse').onclick=e=>{const t=$('term');t.classList.toggle('collapsed');e.target.textContent=t.classList.contains('collapsed')?'Expand':'Collapse'};
+
+/* ---------- matrix (screen 2) ---------- */
+const C={
+ a:{t:'Map expiry at the route boundary',l:'API boundary',ok:true,add:11,del:2,
+  why:'Catch TokenExpiredError in the /auth/refresh handler and respond 401 token_expired. Service semantics and the global error handler are untouched.',
+  tr:[['+','Smallest change surface; contained to one route'],['+','No change to any shared contract'],['−','Other callers of refresh() would still surface 500'],['−','Error mapping lives in the route, not the domain']],
+  files:[['src/routes/auth.ts',10,2],['src/errors/index.ts',1,0]],more:'',
+  diff:[['h','@@ -3,6 +3,7 @@'],[' ',"import { Router } from 'express';",3,3],[' ',"import { authService } from '../services/authService';",4,4],['+',"import { TokenExpiredError } from '../errors';",null,5],[' ',"import { parseRefreshBody, toSessionDto } from './dto';",5,6],
+   ['h',"@@ -41,8 +42,15 @@ router.post('/auth/refresh', async (req, res) => {"],[' ','  const { refreshToken } = parseRefreshBody(req.body);',41,42],['-','  const session = await authService.refresh(refreshToken);',42,null],['-','  return res.status(200).json(toSessionDto(session));',43,null],['+','  try {',null,43],['+','    const session = await authService.refresh(refreshToken);',null,44],['+','    return res.status(200).json(toSessionDto(session));',null,45],['+','  } catch (err) {',null,46],['+','    if (err instanceof TokenExpiredError) {',null,47],['+',"      return res.status(401).json({ error: 'token_expired' });",null,48],['+','    }',null,49],['+','    throw err;',null,50],['+','  }',null,51],[' ','});',44,52]]},
+ b:{t:'Global handler maps AuthError → 401',l:'Error middleware',ok:false,add:64,del:11,
+  why:'Teach the global error middleware to map every AuthError subclass to 401, so any auth failure anywhere becomes a 401.',
+  tr:[['+','One place handles every auth error'],['−','Collapses 403 semantics for revoked and suspended into 401'],['−','Adds a runtime dependency (http-errors)'],['−','Largest change surface: 7 files, incl. lockfile']],
+  files:[['src/middleware/errorHandler.ts',12,2],['src/errors/AuthError.ts',9,1],['src/errors/RevokedSessionError.ts',3,3],['src/errors/SuspendedAccountError.ts',3,3],['src/routes/auth.ts',4,2],['package.json',1,0],['pnpm-lock.yaml',32,0]],more:'+ 6 more files',
+  fail:['tests/auth/refresh.test.ts › revoked token › responds 403','tests/auth/me.test.ts › suspended account › responds 403'],
+  diff:[['h','@@ -1,9 +1,15 @@'],[' ',"import type { ErrorRequestHandler } from 'express';",1,1],['+',"import createError from 'http-errors';",null,2],['+',"import { AuthError } from '../errors';",null,3],[' ',"import { logger } from '../lib/logger';",2,4],[' ','',3,5],[' ','export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {',4,6],['+','  if (err instanceof AuthError) {',null,7],['+','    const httpErr = createError(401, err.code);',null,8],['+','    return res.status(httpErr.status).json({ error: err.code });',null,9],['+','  }',null,10],['-',"  logger.error({ err }, 'unhandled');",5,null],['+',"  logger.error({ err, path: req.path }, 'unhandled error');",null,11],[' ',"  return res.status(500).json({ error: 'internal_error' });",6,12],[' ','};',7,13]]},
+ c:{t:'Typed Result from AuthService.refresh()',l:'Service layer',ok:true,add:41,del:9,
+  why:'Make AuthService.refresh() return a typed Result<Session, RefreshError>; the route maps each error kind to an explicit HTTP status.',
+  tr:[['+','Expiry becomes explicit in the type system'],['+','Future callers are forced to handle it'],['−','Changes an internal service signature (2 callers)'],['−','Introduces a new Result helper module']],
+  files:[['src/services/authService.ts',14,6],['src/routes/auth.ts',9,3],['src/lib/result.ts',18,0]],more:'+ 2 more files',
+  diff:[['h','@@ -18,11 +18,11 @@ export class AuthService {'],['-','  async refresh(token: string): Promise<Session> {',18,null],['+','  async refresh(token: string): Promise<Result<Session, RefreshError>> {',null,18],[' ','    const claims = await this.verifier.verify(token);',19,19],[' ','    if (claims.exp < this.clock.now()) {',20,20],['-','      throw new TokenExpiredError(claims.sub);',21,null],['+',"      return err({ kind: 'expired', subject: claims.sub });",null,21],[' ','    }',22,22],['-','    return this.sessions.rotate(claims);',23,null],['+','    return ok(await this.sessions.rotate(claims));',null,23],[' ','  }',24,24]]}
+};
+const P=(t,s='')=>({k:'pass',t,s}),F=(t,s='')=>({k:'fail',t,s}),N=t=>({k:'na',t}),X=(t,s)=>({k:'exp',t,s});
+const rows=[
+ ['g','Hard gates','any failure rejects the candidate'],
+ ['Regression test','the reproduced bug',X('✕ fail','expected'),P('pass'),P('pass'),P('pass')],
+ ['Existing tests','',N('142/142'),P('142/142'),F('140/142'),P('142/142')],
+ ['New failures vs baseline','',N('—'),P('0'),F('2','view →'),P('0')],
+ ['Typecheck','tsc --noEmit',N('pass'),P('pass'),P('pass'),P('pass')],
+ ['Lint','eslint, 0 warnings',N('pass'),P('pass'),P('pass'),P('pass')],
+ ['Production build','',N('pass'),P('pass'),P('pass'),P('pass')],
+ ['g','Informational','shown, never scored'],
+ ['Files changed','excl. injected test',N('—'),N('2'),N('7'),N('3')],
+ ['Lines changed','',N('—'),'bar:a','bar:b','bar:c'],
+ ['Dependency changes','',N('—'),N('none'),N('+1 http-errors'),N('none')],
+ ['Contracts / config touched','',N('—'),N('none'),N('package.json · error semantics'),N('refresh() signature')],
+ ['Verification time','',N('38.6s'),N('41.2s'),N('47.9s'),N('44.6s')]
+];
+let sel='a';
+function cellHtml(c){
+  if(typeof c==='string'){const d=C[c.split(':')[1]],max=75;
+    return `<div class="cell na" style="color:var(--ink)"><span style="color:var(--pgreen)">+${d.add}</span> <span style="color:var(--pred)">−${d.del}</span></div><div class="bar"><i class="ba" style="width:${d.add/max*100}%"></i><i class="bd" style="width:${d.del/max*100}%"></i></div>`;}
+  const gl=c.k==='pass'?'✓':c.k==='fail'?'✕':'';
+  let s=c.s;
+  if(c.k==='fail'&&s)s=`<button class="reason" style="display:inline;margin:0" onclick="pick('b',true)">${s}</button>`;
+  else if(s)s=`<small>${s}</small>`;
+  return `<div class="cell ${c.k}">${gl?`<span class="gl">${gl}</span>`:''}${c.t} ${s}</div>`;
+}
+function drawMatrix(){
+  const ids=['a','b','c'];
+  let h=`<colgroup><col class="c0"><col class="cb"><col><col><col></colgroup><thead><tr><th class="corner"><div style="font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)">Evidence</div></th>
+  <th><div class="ptile" style="border-color:var(--ink3);color:var(--ink3)">∅</div><div class="ct" style="color:var(--ink2);font-weight:600;font-size:13px;margin-top:8px">Baseline</div><div style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-top:3px">4c1e9a2 · untouched</div></th>`;
+  ids.forEach(id=>{const d=C[id];
+    h+=`<th class="colh ${sel===id?'sel':''}" tabindex="0" data-id="${id}"><div class="ptile">${id.toUpperCase()}</div><div class="ct ${d.ok?'':'rej'}">${d.t}</div><div class="cl">${d.l}</div>
+    ${d.ok?'<span class="verdict ok">✓ ELIGIBLE</span>':'<span class="verdict no">✕ REJECTED</span><span class="reason">2 previously passing tests now fail</span>'}</th>`;});
+  h+='</tr></thead><tbody>';
+  rows.forEach(r=>{
+    if(r[0]==='g'){h+=`<tr class="grp"><td colspan="5">${r[1]}<span>${r[2]}</span></td></tr>`;return;}
+    h+=`<tr><td class="rowh">${r[0]}${r[1]?`<small>${r[1]}</small>`:''}</td><td>${cellHtml(r[2])}</td>`;
+    ids.forEach((id,i)=>h+=`<td class="${sel===id?'sel':''}">${cellHtml(r[3+i])}</td>`);
+    h+='</tr>';
+  });
+  $('matrix').innerHTML=h+'</tbody>';
+  document.querySelectorAll('.colh').forEach(th=>{th.onclick=()=>pick(th.dataset.id);th.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(th.dataset.id)}}});
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function drawDetail(){
+  const d=C[sel],U=sel.toUpperCase(),cmd=`git switch patchbench/7f3a/candidate-${sel}`;
+  const diff=d.diff.map(l=>{
+    if(l[0]==='h')return `<div class="ln hk"><span></span><span></span><span></span><span>${esc(l[1])}</span></div>`;
+    const c=l[0]==='+'?'ad':l[0]==='-'?'dl':'cx';
+    return `<div class="ln ${c}"><span>${l[2]??''}</span><span>${l[3]??''}</span><span>${l[0]===' '?'':l[0]}</span><span>${esc(l[1])}</span></div>`;}).join('');
+  $('detail').innerHTML=`
+  <div class="d-left">
+    <div><h3><span class="tile">${U}</span>${d.t}</h3><p>${d.why}</p></div>
+    ${d.fail?`<div class="failbox"><div class="t">✕ Hard gate · existing tests</div><div class="out" style="margin-top:8px">${d.fail.map(f=>`<div><span class="f">✕</span> <span class="w">${f}</span></div><div>  <span class="f">expected 403, received 401</span></div>`).join('')}</div></div>`:''}
+    <div><div class="label">Trade-offs · from strategy</div><ul class="tradeoffs">${d.tr.map(t=>`<li><span class="pm">${t[0]}</span><span>${t[1]}</span></li>`).join('')}</ul></div>
+    <div><div class="label">Files changed</div><ul class="files">${d.files.map(f=>`<li><span>${f[0]}</span><span><span class="add">+${f[1]}</span> <span class="del">−${f[2]}</span></span></li>`).join('')}</ul></div>
+    <div class="checkout"><div class="label">${d.ok?'Adopt this candidate':'Rejected · still inspectable'}</div>
+      <div class="cmd"><code>${cmd}</code><button class="btn ${d.ok?'primary':''}" style="height:26px" data-copy="${cmd}">${d.ok?'Copy':'Copy anyway'}</button></div>
+    </div>
+  </div>
+  <div class="d-right">
+    <div class="d-tabs"><span class="ft">${d.files[0][0]}</span><span class="more">${d.more}</span><div class="spacer"></div><button class="btn ghost" style="height:26px;font-size:11.5px">Open worktree</button></div>
+    <div class="diff">${diff}</div>
+  </div>`;
+  document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>{navigator.clipboard?.writeText(b.dataset.copy).catch(()=>{});toast('Command copied')});
+}
+function pick(id,scroll){sel=id;drawMatrix();drawDetail();if(scroll)$('detail').scrollIntoView({behavior:'smooth',block:'start'})}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1800)}
+document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>toast(b.dataset.toast));
+pick('a');
+</script>
+</body>
+</html>
