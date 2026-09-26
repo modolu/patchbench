@@ -5,8 +5,9 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { EvidenceWorkbench } from "@/components/pb/evidence-workbench";
 import { NewBenchmarkForm } from "@/components/pb/new-benchmark-form";
 import { BaselineStrip, CandidateCard } from "@/components/pb/run-overview";
+import { ShowcaseIntro } from "@/components/pb/showcase-intro";
 import { uiConfig } from "@/server/ui/config";
-import { loadRunView, type RunView } from "@/server/ui/run-reader";
+import { listRunSummaries, loadRunView, type RunView } from "@/server/ui/run-reader";
 import { REPO_ROOT } from "../helpers/scenario";
 
 let view: RunView;
@@ -124,9 +125,20 @@ describe("new benchmark form", () => {
   const policy = { candidateCount: 3, timeoutSeconds: 120, maxTurnsPerTask: 20, maxCostPerTask: 1, excludePaths: [".git"], requireTypecheck: true, requireBuild: true };
   it("disables every execution control in showcase mode", () => {
     const html = renderToStaticMarkup(<NewBenchmarkForm mode="showcase" policy={policy} />);
-    expect(html).toContain("Showcase mode.");
+    expect(html).toContain("Execution is disabled in showcase mode.");
+    expect(html).not.toContain("not wired yet");
     expect(html).toMatch(/<input id="repo"[^>]*disabled/);
     expect(html).toMatch(/<button type="submit"[^>]*disabled/);
+  });
+  it("showcase intro links to the persisted captured run without claiming hosted execution", async () => {
+    const config = uiConfig({ PATCHBENCH_MODE: "showcase", PATCHBENCH_SHOWCASE_ROOT: path.join(REPO_ROOT, "showcase") }, REPO_ROOT);
+    const captured = (await listRunSummaries(config)).find((r) => r.status === "COMPLETE");
+    expect(captured).toMatchObject({ repoName: "auth-expiry-bug", eligible: 2, rejected: 1 });
+    const html = renderToStaticMarkup(<ShowcaseIntro captured={captured} />);
+    expect(html).toContain("Repository execution runs locally in PatchBench.");
+    expect(html).toContain(`href="/runs/${captured!.id}"`);
+    expect(html).toContain("View captured benchmark");
+    expect(html).not.toMatch(/never uploaded|not wired/);
   });
   it("uses accurate local-first copy", () => {
     const html = renderToStaticMarkup(<NewBenchmarkForm mode="local" policy={policy} />);

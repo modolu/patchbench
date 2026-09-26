@@ -24,7 +24,8 @@ const COMMAND_ROLE: Record<string, string> = {
 /**
  * New-benchmark form (mockup screen 01). Repository inspection is a real,
  * read-only server action in local mode. Starting a run from the UI is not
- * wired in this build, so the start control stays honestly disabled.
+ * wired in this build, so the start control stays honestly disabled. In
+ * showcase mode the page leads with ShowcaseIntro and every control is disabled.
  */
 export function NewBenchmarkForm({ mode, policy }: { mode: "local" | "showcase"; policy: PolicySummary }) {
   const showcase = mode === "showcase";
@@ -58,13 +59,8 @@ export function NewBenchmarkForm({ mode, policy }: { mode: "local" | "showcase";
   };
 
   return (
-    <form className="nb" onSubmit={(e) => e.preventDefault()} aria-describedby={showcase ? "showcase-note" : undefined}>
+    <form className="nb" onSubmit={(e) => e.preventDefault()} aria-describedby={showcase ? "showcase-desc" : undefined}>
       <div className="nb-col">
-        {showcase && (
-          <div className="unavailable" id="showcase-note" role="note">
-            <b>Showcase mode.</b> This hosted build renders captured, sanitized runs. It cannot inspect or execute repositories; every execution control is disabled.
-          </div>
-        )}
         <section className="card" aria-labelledby="step-repo">
           <div className="step-h">
             <span className={`stepn${snapshot ? " ok" : ""}`} aria-hidden>
@@ -322,7 +318,7 @@ export function NewBenchmarkForm({ mode, policy }: { mode: "local" | "showcase";
           <p className="unavailable" id="start-unavailable">
             {showcase ? (
               <>
-                <b>Execution is disabled in showcase mode.</b> Open a captured run from the rail to inspect real evidence.
+                <b>Execution is disabled in showcase mode.</b> Benchmarks start from a local PatchBench install; open the captured benchmark to inspect real evidence.
               </>
             ) : (
               <>

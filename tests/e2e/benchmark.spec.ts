@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
 
 const RUN_ID = readdirSync(path.join(process.cwd(), "showcase", "runs"))[0]!;
 
-test("new benchmark screen is honest in showcase mode", async ({ page }) => {
+test("new benchmark screen is honest and intentional in showcase mode", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/new$/);
   await expect(page.getByRole("heading", { level: 1, name: "New benchmark" })).toBeVisible();
@@ -12,7 +12,16 @@ test("new benchmark screen is honest in showcase mode", async ({ page }) => {
   await expect(page.getByTestId("start-benchmark")).toBeDisabled();
   await expect(page.getByText("Execution is disabled in showcase mode.")).toBeVisible();
   await expect(page.getByText(/never uploaded/)).toHaveCount(0);
-  await expect(page.getByTestId("recent-runs").getByRole("link")).toHaveCount(1);
+  await expect(page.getByText(/not wired/)).toHaveCount(0);
+  const rail = page.getByTestId("recent-runs");
+  await expect(rail.getByRole("link")).toHaveCount(1);
+  await expect(rail).toContainText("auth-expiry-bug");
+  await expect(rail).toContainText("2 eligible · 1 rejected");
+
+  await expect(page.getByRole("heading", { name: "Repository execution runs locally in PatchBench." })).toBeVisible();
+  await page.getByTestId("showcase-cta").click();
+  await expect(page).toHaveURL(new RegExp(`/runs/${RUN_ID}$`));
+  await expect(page.getByTestId("run-status")).toHaveText(/COMPLETE/);
 });
 
 test("live bench renders the persisted completed run", async ({ page }) => {
