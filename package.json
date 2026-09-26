@@ -7,14 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test",
     "test:live-bob": "vitest run --config vitest.live.config.mts",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "fixture:prepare": "node scripts/prepare-fixture.mts"
+    "fixture:prepare": "node scripts/prepare-fixture.mts",
+    "showcase:capture": "vitest run --config vitest.showcase.config.mts"
   },
   "dependencies": {
     "lucide-react": "^1.48.0",

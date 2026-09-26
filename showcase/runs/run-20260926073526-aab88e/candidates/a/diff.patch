@@ -1,0 +1,18 @@
+diff --git a/src/http-errors.ts b/src/http-errors.ts
+index aacaf15..5fe7712 100644
+--- a/src/http-errors.ts
++++ b/src/http-errors.ts
+@@ -1,4 +1,4 @@
+-import { HttpError, InvalidTokenError, ValidationError } from "./errors.ts";
++import { HttpError, InvalidTokenError, TokenExpiredError, ValidationError } from "./errors.ts";
+ 
+ export interface ErrorBody {
+   error: string;
+@@ -8,6 +8,7 @@ export interface ErrorBody {
+ export function toErrorResponse(error: unknown): { status: number; body: ErrorBody } {
+   if (error instanceof ValidationError) return { status: 400, body: { error: "invalid_request" } };
+   if (error instanceof InvalidTokenError) return { status: 401, body: { error: "invalid_token" } };
++  if (error instanceof TokenExpiredError) return { status: 401, body: { error: "token_expired" } };
+   if (error instanceof HttpError) return { status: error.status, body: { error: error.code } };
+   return { status: 500, body: { error: "internal_error" } };
+ }

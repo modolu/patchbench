@@ -1,0 +1,33 @@
+{
+  "outcome": "REPRODUCED",
+  "testFiles": [
+    "test/refresh-expired.test.ts"
+  ],
+  "expectedFailure": "expected 401, received 500",
+  "command": {
+    "command": "node",
+    "args": [
+      "--test",
+      "--test-reporter=tap",
+      "test/refresh-expired.test.ts"
+    ]
+  },
+  "baselineCheck": {
+    "name": "regression",
+    "passed": false,
+    "exitCode": 1,
+    "durationMs": 147,
+    "timedOut": false,
+    "failures": [
+      "expired refresh token returns 401, not 500"
+    ],
+    "logPath": "reproduction/logs/baseline.log"
+  },
+  "frozenPatchSha256": "039c25dc6c1359a802bac346861625396bbb87ea2802c055eefe77fc18a5183a",
+  "frozenFiles": [
+    {
+      "path": "test/refresh-expired.test.ts",
+      "sha256": "6f07dae232973069e7a0056a1690455f2f186a3dfd324df672d97632cf26fade"
+    }
+  ]
+}

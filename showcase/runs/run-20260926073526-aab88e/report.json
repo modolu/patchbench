@@ -1,0 +1,270 @@
+{
+  "runId": "run-20260926073526-aab88e",
+  "baselineSha": "ad6b83d8a2b68a9220a8374cb5e24202edac07cd",
+  "baselineFailures": [],
+  "candidates": [
+    {
+      "id": "a",
+      "title": "Map TokenExpiredError in the HTTP error mapper",
+      "status": "ELIGIBLE",
+      "rejectionReasons": []
+    },
+    {
+      "id": "b",
+      "title": "Treat any refresh failure as unauthorized",
+      "status": "REJECTED",
+      "rejectionReasons": [
+        "Introduced new test failures (2): test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error; test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+      ]
+    },
+    {
+      "id": "c",
+      "title": "Handle expiry explicitly in the refresh route",
+      "status": "ELIGIBLE",
+      "rejectionReasons": []
+    }
+  ],
+  "rows": [
+    {
+      "key": "frozen_regression",
+      "label": "Frozen regression test intact",
+      "kind": "hard-gate",
+      "candidateValues": {
+        "a": {
+          "status": "pass",
+          "display": "INTACT"
+        },
+        "b": {
+          "status": "pass",
+          "display": "INTACT"
+        },
+        "c": {
+          "status": "pass",
+          "display": "INTACT"
+        }
+      }
+    },
+    {
+      "key": "regression",
+      "label": "Regression test",
+      "kind": "hard-gate",
+      "candidateValues": {
+        "a": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "b": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "c": {
+          "status": "pass",
+          "display": "PASS"
+        }
+      }
+    },
+    {
+      "key": "new_failures",
+      "label": "New test failures vs baseline",
+      "kind": "hard-gate",
+      "candidateValues": {
+        "a": {
+          "status": "pass",
+          "display": "0"
+        },
+        "b": {
+          "status": "fail",
+          "display": "2",
+          "detail": [
+            "test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error",
+            "test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+          ]
+        },
+        "c": {
+          "status": "pass",
+          "display": "0"
+        }
+      }
+    },
+    {
+      "key": "existing_tests",
+      "label": "Test suite (pass / total, incl. frozen regression)",
+      "kind": "informational",
+      "candidateValues": {
+        "a": {
+          "status": "pass",
+          "display": "13/13"
+        },
+        "b": {
+          "status": "fail",
+          "display": "11/13"
+        },
+        "c": {
+          "status": "pass",
+          "display": "13/13"
+        }
+      }
+    },
+    {
+      "key": "preserved_failures",
+      "label": "Pre-existing baseline failures still failing",
+      "kind": "informational",
+      "candidateValues": {
+        "a": {
+          "status": "info",
+          "display": "0"
+        },
+        "b": {
+          "status": "info",
+          "display": "0"
+        },
+        "c": {
+          "status": "info",
+          "display": "0"
+        }
+      }
+    },
+    {
+      "key": "typecheck",
+      "label": "Typecheck",
+      "kind": "hard-gate",
+      "candidateValues": {
+        "a": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "b": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "c": {
+          "status": "pass",
+          "display": "PASS"
+        }
+      }
+    },
+    {
+      "key": "lint",
+      "label": "Lint",
+      "kind": "informational",
+      "candidateValues": {
+        "a": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "b": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "c": {
+          "status": "pass",
+          "display": "PASS"
+        }
+      }
+    },
+    {
+      "key": "build",
+      "label": "Build",
+      "kind": "hard-gate",
+      "candidateValues": {
+        "a": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "b": {
+          "status": "pass",
+          "display": "PASS"
+        },
+        "c": {
+          "status": "pass",
+          "display": "PASS"
+        }
+      }
+    },
+    {
+      "key": "files_changed",
+      "label": "Files changed",
+      "kind": "informational",
+      "candidateValues": {
+        "a": {
+          "status": "info",
+          "display": "1",
+          "detail": [
+            "src/http-errors.ts"
+          ]
+        },
+        "b": {
+          "status": "info",
+          "display": "1",
+          "detail": [
+            "src/app.ts"
+          ]
+        },
+        "c": {
+          "status": "info",
+          "display": "1",
+          "detail": [
+            "src/app.ts"
+          ]
+        }
+      }
+    },
+    {
+      "key": "diff_size",
+      "label": "Lines added / deleted",
+      "kind": "informational",
+      "candidateValues": {
+        "a": {
+          "status": "info",
+          "display": "+2 / -1"
+        },
+        "b": {
+          "status": "info",
+          "display": "+6 / -2"
+        },
+        "c": {
+          "status": "info",
+          "display": "+8 / -3"
+        }
+      }
+    },
+    {
+      "key": "dependency_manifest",
+      "label": "Dependency manifest changed",
+      "kind": "informational",
+      "candidateValues": {
+        "a": {
+          "status": "info",
+          "display": "NO"
+        },
+        "b": {
+          "status": "info",
+          "display": "NO"
+        },
+        "c": {
+          "status": "info",
+          "display": "NO"
+        }
+      }
+    },
+    {
+      "key": "config_touched",
+      "label": "Config files touched",
+      "kind": "informational",
+      "candidateValues": {
+        "a": {
+          "status": "info",
+          "display": "0"
+        },
+        "b": {
+          "status": "info",
+          "display": "0"
+        },
+        "c": {
+          "status": "info",
+          "display": "0"
+        }
+      }
+    }
+  ]
+}

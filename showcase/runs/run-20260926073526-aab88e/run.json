@@ -1,0 +1,684 @@
+{
+  "id": "run-20260926073526-aab88e",
+  "createdAt": "2026-09-26T07:35:26.916Z",
+  "updatedAt": "2026-09-26T07:35:46.583Z",
+  "repository": {
+    "root": "<local>/auth-expiry-bug",
+    "branch": "main",
+    "commitSha": "ad6b83d8a2b68a9220a8374cb5e24202edac07cd",
+    "isDirty": false,
+    "packageManager": "pnpm",
+    "detectedScripts": {
+      "test": "node --test \"test/**/*.test.ts\"",
+      "lint": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
+      "typecheck": "tsc --noEmit",
+      "build": "tsc -p tsconfig.build.json"
+    }
+  },
+  "issue": {
+    "title": "Expired refresh token returns HTTP 500 instead of the documented 401",
+    "description": "POST /auth/refresh with a refresh token past its expiry responds 500 internal_error. AuthService.refresh throws TokenExpiredError, which the HTTP error mapper does not handle, so clients treat an expired session as an outage and retry.",
+    "expectedBehavior": "POST /auth/refresh with an expired refresh token responds 401. All other documented auth responses are unchanged.",
+    "actualBehavior": "500 {\"error\":\"internal_error\"}"
+  },
+  "policy": {
+    "candidateCount": 3,
+    "verificationCommands": [
+      {
+        "name": "test",
+        "command": "pnpm",
+        "args": [
+          "run",
+          "test"
+        ],
+        "required": true
+      },
+      {
+        "name": "typecheck",
+        "command": "pnpm",
+        "args": [
+          "run",
+          "typecheck"
+        ],
+        "required": true
+      },
+      {
+        "name": "lint",
+        "command": "pnpm",
+        "args": [
+          "run",
+          "lint"
+        ],
+        "required": false
+      },
+      {
+        "name": "build",
+        "command": "pnpm",
+        "args": [
+          "run",
+          "build"
+        ],
+        "required": true
+      }
+    ],
+    "regressionCommand": {
+      "command": "node",
+      "args": [
+        "--test",
+        "--test-reporter=tap"
+      ]
+    },
+    "commandTimeoutMs": 120000,
+    "maxOutputBytes": 262144,
+    "envAllowList": [
+      "PATH",
+      "HOME",
+      "LANG",
+      "LC_ALL",
+      "TMPDIR",
+      "TERM",
+      "CI"
+    ],
+    "bob": {
+      "maxCostPerTask": 1,
+      "maxTurnsPerTask": 20
+    },
+    "excludePaths": [
+      ".git",
+      "node_modules",
+      ".next",
+      "dist",
+      "build",
+      ".env",
+      ".env.*"
+    ],
+    "requireBuild": true,
+    "requireTypecheck": true
+  },
+  "status": "COMPLETE",
+  "baseline": {
+    "commitSha": "ad6b83d8a2b68a9220a8374cb5e24202edac07cd",
+    "checks": [
+      {
+        "name": "test",
+        "passed": true,
+        "exitCode": 0,
+        "durationMs": 602,
+        "timedOut": false,
+        "failures": [],
+        "logPath": "baseline/logs/test.log",
+        "command": {
+          "command": "pnpm",
+          "args": [
+            "run",
+            "test"
+          ]
+        },
+        "summary": {
+          "tests": 12,
+          "pass": 12,
+          "fail": 0
+        }
+      },
+      {
+        "name": "typecheck",
+        "passed": true,
+        "exitCode": 0,
+        "durationMs": 2132,
+        "timedOut": false,
+        "failures": [],
+        "logPath": "baseline/logs/typecheck.log",
+        "command": {
+          "command": "pnpm",
+          "args": [
+            "run",
+            "typecheck"
+          ]
+        }
+      },
+      {
+        "name": "lint",
+        "passed": true,
+        "exitCode": 0,
+        "durationMs": 1144,
+        "timedOut": false,
+        "failures": [],
+        "logPath": "baseline/logs/lint.log",
+        "command": {
+          "command": "pnpm",
+          "args": [
+            "run",
+            "lint"
+          ]
+        }
+      },
+      {
+        "name": "build",
+        "passed": true,
+        "exitCode": 0,
+        "durationMs": 1165,
+        "timedOut": false,
+        "failures": [],
+        "logPath": "baseline/logs/build.log",
+        "command": {
+          "command": "pnpm",
+          "args": [
+            "run",
+            "build"
+          ]
+        }
+      }
+    ],
+    "failures": [],
+    "durationMs": 5448
+  },
+  "reproduction": {
+    "outcome": "REPRODUCED",
+    "testFiles": [
+      "test/refresh-expired.test.ts"
+    ],
+    "expectedFailure": "expected 401, received 500",
+    "command": {
+      "command": "node",
+      "args": [
+        "--test",
+        "--test-reporter=tap",
+        "test/refresh-expired.test.ts"
+      ]
+    },
+    "baselineCheck": {
+      "name": "regression",
+      "passed": false,
+      "exitCode": 1,
+      "durationMs": 147,
+      "timedOut": false,
+      "failures": [
+        "expired refresh token returns 401, not 500"
+      ],
+      "logPath": "reproduction/logs/baseline.log"
+    },
+    "frozenPatchSha256": "039c25dc6c1359a802bac346861625396bbb87ea2802c055eefe77fc18a5183a",
+    "frozenFiles": [
+      {
+        "path": "test/refresh-expired.test.ts",
+        "sha256": "6f07dae232973069e7a0056a1690455f2f186a3dfd324df672d97632cf26fade"
+      }
+    ]
+  },
+  "strategies": [
+    {
+      "id": "a",
+      "title": "Map TokenExpiredError in the HTTP error mapper",
+      "rationale": "The domain already distinguishes expiry; the HTTP boundary simply lacks a mapping for it.",
+      "likelyFiles": [
+        "src/http-errors.ts"
+      ],
+      "tradeoffs": [
+        "Smallest change",
+        "Every route gains the mapping, which is the documented contract"
+      ],
+      "implementationBrief": "Add a TokenExpiredError branch to toErrorResponse returning 401 { error: \"token_expired\" }."
+    },
+    {
+      "id": "b",
+      "title": "Treat any refresh failure as unauthorized",
+      "rationale": "Clients only need to know they must log in again when refresh fails.",
+      "likelyFiles": [
+        "src/app.ts"
+      ],
+      "tradeoffs": [
+        "Simple catch-all",
+        "Collapses distinct failure modes into one status"
+      ],
+      "implementationBrief": "Wrap the refresh route in a try/catch that returns 401 { error: \"invalid_token\" } for any thrown error."
+    },
+    {
+      "id": "c",
+      "title": "Handle expiry explicitly in the refresh route",
+      "rationale": "Expiry is only meaningful for the refresh flow; keep the global mapper untouched.",
+      "likelyFiles": [
+        "src/app.ts"
+      ],
+      "tradeoffs": [
+        "Local, explicit handling",
+        "Other routes that surface expiry would need their own handling"
+      ],
+      "implementationBrief": "Catch TokenExpiredError around auth.refresh in the refresh route and return 401 { error: \"token_expired\" }; rethrow anything else."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "a",
+      "strategyId": "a",
+      "worktreePath": "<local>/.patchbench/worktrees/run-20260926073526-aab88e/a",
+      "branchName": "patchbench/run-20260926073526-aab88e/a",
+      "status": "ELIGIBLE",
+      "implementation": {
+        "startedAt": "2026-09-26T07:35:33.601Z",
+        "finishedAt": "2026-09-26T07:35:33.603Z",
+        "bobTaskId": "fake-run-20260926073526-aab88e-a"
+      },
+      "diff": {
+        "filesChanged": 1,
+        "insertions": 2,
+        "deletions": 1,
+        "files": [
+          {
+            "path": "src/http-errors.ts",
+            "insertions": 2,
+            "deletions": 1
+          }
+        ],
+        "dependencyManifestChanged": false,
+        "configFilesTouched": []
+      },
+      "verification": {
+        "regressionIntact": true,
+        "regression": {
+          "name": "regression",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 146,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/a/logs/regression.log",
+          "command": {
+            "command": "node",
+            "args": [
+              "--test",
+              "--test-reporter=tap",
+              "test/refresh-expired.test.ts"
+            ]
+          },
+          "summary": {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0
+          }
+        },
+        "tests": {
+          "name": "test",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 662,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/a/logs/test.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "test"
+            ]
+          },
+          "summary": {
+            "tests": 13,
+            "pass": 13,
+            "fail": 0
+          }
+        },
+        "typecheck": {
+          "name": "typecheck",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1409,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/a/logs/typecheck.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "typecheck"
+            ]
+          }
+        },
+        "lint": {
+          "name": "lint",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1031,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/a/logs/lint.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "lint"
+            ]
+          }
+        },
+        "build": {
+          "name": "build",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1043,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/a/logs/build.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "build"
+            ]
+          }
+        },
+        "newFailures": [],
+        "baselineFailures": [],
+        "preservedFailures": [],
+        "diff": {
+          "filesChanged": 1,
+          "insertions": 2,
+          "deletions": 1,
+          "files": [
+            {
+              "path": "src/http-errors.ts",
+              "insertions": 2,
+              "deletions": 1
+            }
+          ],
+          "dependencyManifestChanged": false,
+          "configFilesTouched": []
+        },
+        "hardGatePassed": true,
+        "rejectionReasons": []
+      }
+    },
+    {
+      "id": "b",
+      "strategyId": "b",
+      "worktreePath": "<local>/.patchbench/worktrees/run-20260926073526-aab88e/b",
+      "branchName": "patchbench/run-20260926073526-aab88e/b",
+      "status": "REJECTED",
+      "implementation": {
+        "startedAt": "2026-09-26T07:35:33.637Z",
+        "finishedAt": "2026-09-26T07:35:33.638Z",
+        "bobTaskId": "fake-run-20260926073526-aab88e-b"
+      },
+      "diff": {
+        "filesChanged": 1,
+        "insertions": 6,
+        "deletions": 2,
+        "files": [
+          {
+            "path": "src/app.ts",
+            "insertions": 6,
+            "deletions": 2
+          }
+        ],
+        "dependencyManifestChanged": false,
+        "configFilesTouched": []
+      },
+      "verification": {
+        "regressionIntact": true,
+        "regression": {
+          "name": "regression",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 146,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/b/logs/regression.log",
+          "command": {
+            "command": "node",
+            "args": [
+              "--test",
+              "--test-reporter=tap",
+              "test/refresh-expired.test.ts"
+            ]
+          },
+          "summary": {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0
+          }
+        },
+        "tests": {
+          "name": "test",
+          "passed": false,
+          "exitCode": 1,
+          "durationMs": 582,
+          "timedOut": false,
+          "failures": [
+            "test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error",
+            "test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+          ],
+          "logPath": "candidates/b/logs/test.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "test"
+            ]
+          },
+          "summary": {
+            "tests": 13,
+            "pass": 11,
+            "fail": 2
+          }
+        },
+        "typecheck": {
+          "name": "typecheck",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1380,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/b/logs/typecheck.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "typecheck"
+            ]
+          }
+        },
+        "lint": {
+          "name": "lint",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1005,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/b/logs/lint.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "lint"
+            ]
+          }
+        },
+        "build": {
+          "name": "build",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1161,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/b/logs/build.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "build"
+            ]
+          }
+        },
+        "newFailures": [
+          "test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error",
+          "test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+        ],
+        "baselineFailures": [],
+        "preservedFailures": [],
+        "diff": {
+          "filesChanged": 1,
+          "insertions": 6,
+          "deletions": 2,
+          "files": [
+            {
+              "path": "src/app.ts",
+              "insertions": 6,
+              "deletions": 2
+            }
+          ],
+          "dependencyManifestChanged": false,
+          "configFilesTouched": []
+        },
+        "hardGatePassed": false,
+        "rejectionReasons": [
+          "Introduced new test failures (2): test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error; test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+        ]
+      }
+    },
+    {
+      "id": "c",
+      "strategyId": "c",
+      "worktreePath": "<local>/.patchbench/worktrees/run-20260926073526-aab88e/c",
+      "branchName": "patchbench/run-20260926073526-aab88e/c",
+      "status": "ELIGIBLE",
+      "implementation": {
+        "startedAt": "2026-09-26T07:35:33.668Z",
+        "finishedAt": "2026-09-26T07:35:33.670Z",
+        "bobTaskId": "fake-run-20260926073526-aab88e-c"
+      },
+      "diff": {
+        "filesChanged": 1,
+        "insertions": 8,
+        "deletions": 3,
+        "files": [
+          {
+            "path": "src/app.ts",
+            "insertions": 8,
+            "deletions": 3
+          }
+        ],
+        "dependencyManifestChanged": false,
+        "configFilesTouched": []
+      },
+      "verification": {
+        "regressionIntact": true,
+        "regression": {
+          "name": "regression",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 144,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/c/logs/regression.log",
+          "command": {
+            "command": "node",
+            "args": [
+              "--test",
+              "--test-reporter=tap",
+              "test/refresh-expired.test.ts"
+            ]
+          },
+          "summary": {
+            "tests": 1,
+            "pass": 1,
+            "fail": 0
+          }
+        },
+        "tests": {
+          "name": "test",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 514,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/c/logs/test.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "test"
+            ]
+          },
+          "summary": {
+            "tests": 13,
+            "pass": 13,
+            "fail": 0
+          }
+        },
+        "typecheck": {
+          "name": "typecheck",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1424,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/c/logs/typecheck.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "typecheck"
+            ]
+          }
+        },
+        "lint": {
+          "name": "lint",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1017,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/c/logs/lint.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "lint"
+            ]
+          }
+        },
+        "build": {
+          "name": "build",
+          "passed": true,
+          "exitCode": 0,
+          "durationMs": 1054,
+          "timedOut": false,
+          "failures": [],
+          "logPath": "candidates/c/logs/build.log",
+          "command": {
+            "command": "pnpm",
+            "args": [
+              "run",
+              "build"
+            ]
+          }
+        },
+        "newFailures": [],
+        "baselineFailures": [],
+        "preservedFailures": [],
+        "diff": {
+          "filesChanged": 1,
+          "insertions": 8,
+          "deletions": 3,
+          "files": [
+            {
+              "path": "src/app.ts",
+              "insertions": 8,
+              "deletions": 3
+            }
+          ],
+          "dependencyManifestChanged": false,
+          "configFilesTouched": []
+        },
+        "hardGatePassed": true,
+        "rejectionReasons": []
+      }
+    }
+  ],
+  "metrics": {
+    "stageDurationsMs": {
+      "baseline": 5448,
+      "reproduction": 223
+    },
+    "commandsExecuted": 5,
+    "candidatesRejected": 1
+  }
+}

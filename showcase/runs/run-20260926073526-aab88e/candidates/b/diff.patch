@@ -1,0 +1,19 @@
+diff --git a/src/app.ts b/src/app.ts
+index 46531b4..a4f1bdc 100644
+--- a/src/app.ts
++++ b/src/app.ts
+@@ -28,8 +28,12 @@ export function createApp(auth: [REDACTED] (req: Request) => Response {
+         return { status: 200, body: session };
+       }
+       if (req.method === "POST" && req.path === "/auth/refresh") {
+-        const session = auth.refresh(requireString(req.body, "refreshToken"));
+-        return { status: 200, body: session };
++        const refreshToken = [REDACTED] "refreshToken");
++        try {
++          return { status: 200, body: auth.refresh(refreshToken) };
++        } catch {
++          return { status: 401, body: { error: "invalid_token" } };
++        }
+       }
+       return { status: 404, body: { error: "not_found" } };
+     } catch (error) {

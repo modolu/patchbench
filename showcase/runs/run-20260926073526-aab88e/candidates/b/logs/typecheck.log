@@ -1,0 +1,7 @@
+$ pnpm run typecheck
+# exit=0 signal=null timedOut=false durationMs=1380
+--- stdout ---
+
+--- stderr ---
+$ tsc --noEmit
+

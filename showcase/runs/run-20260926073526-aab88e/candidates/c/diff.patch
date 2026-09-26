@@ -1,0 +1,27 @@
+diff --git a/src/app.ts b/src/app.ts
+index 46531b4..f5077e1 100644
+--- a/src/app.ts
++++ b/src/app.ts
+@@ -1,5 +1,5 @@
+ import type { AuthService } from "./auth-service.ts";
+-import { ValidationError } from "./errors.ts";
++import { TokenExpiredError, ValidationError } from "./errors.ts";
+ import { toErrorResponse } from "./http-errors.ts";
+ 
+ export interface Request {
+@@ -28,8 +28,13 @@ export function createApp(auth: [REDACTED] (req: Request) => Response {
+         return { status: 200, body: session };
+       }
+       if (req.method === "POST" && req.path === "/auth/refresh") {
+-        const session = auth.refresh(requireString(req.body, "refreshToken"));
+-        return { status: 200, body: session };
++        const refreshToken = [REDACTED] "refreshToken");
++        try {
++          return { status: 200, body: auth.refresh(refreshToken) };
++        } catch (error) {
++          if (error instanceof TokenExpiredError) return { status: 401, body: { error: "token_expired" } };
++          throw error;
++        }
+       }
+       return { status: 404, body: { error: "not_found" } };
+     } catch (error) {

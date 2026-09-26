@@ -1,0 +1,139 @@
+{
+  "id": "a",
+  "strategyId": "a",
+  "worktreePath": "<local>/.patchbench/worktrees/run-20260926073526-aab88e/a",
+  "branchName": "patchbench/run-20260926073526-aab88e/a",
+  "status": "ELIGIBLE",
+  "implementation": {
+    "startedAt": "2026-09-26T07:35:33.601Z",
+    "finishedAt": "2026-09-26T07:35:33.603Z",
+    "bobTaskId": "fake-run-20260926073526-aab88e-a"
+  },
+  "diff": {
+    "filesChanged": 1,
+    "insertions": 2,
+    "deletions": 1,
+    "files": [
+      {
+        "path": "src/http-errors.ts",
+        "insertions": 2,
+        "deletions": 1
+      }
+    ],
+    "dependencyManifestChanged": false,
+    "configFilesTouched": []
+  },
+  "verification": {
+    "regressionIntact": true,
+    "regression": {
+      "name": "regression",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 146,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/a/logs/regression.log",
+      "command": {
+        "command": "node",
+        "args": [
+          "--test",
+          "--test-reporter=tap",
+          "test/refresh-expired.test.ts"
+        ]
+      },
+      "summary": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "tests": {
+      "name": "test",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 662,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/a/logs/test.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "test"
+        ]
+      },
+      "summary": {
+        "tests": 13,
+        "pass": 13,
+        "fail": 0
+      }
+    },
+    "typecheck": {
+      "name": "typecheck",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 1409,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/a/logs/typecheck.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "typecheck"
+        ]
+      }
+    },
+    "lint": {
+      "name": "lint",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 1031,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/a/logs/lint.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "lint"
+        ]
+      }
+    },
+    "build": {
+      "name": "build",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 1043,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/a/logs/build.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "build"
+        ]
+      }
+    },
+    "newFailures": [],
+    "baselineFailures": [],
+    "preservedFailures": [],
+    "diff": {
+      "filesChanged": 1,
+      "insertions": 2,
+      "deletions": 1,
+      "files": [
+        {
+          "path": "src/http-errors.ts",
+          "insertions": 2,
+          "deletions": 1
+        }
+      ],
+      "dependencyManifestChanged": false,
+      "configFilesTouched": []
+    },
+    "hardGatePassed": true,
+    "rejectionReasons": []
+  }
+}

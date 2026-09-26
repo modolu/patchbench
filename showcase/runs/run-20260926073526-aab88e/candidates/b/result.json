@@ -1,0 +1,147 @@
+{
+  "id": "b",
+  "strategyId": "b",
+  "worktreePath": "<local>/.patchbench/worktrees/run-20260926073526-aab88e/b",
+  "branchName": "patchbench/run-20260926073526-aab88e/b",
+  "status": "REJECTED",
+  "implementation": {
+    "startedAt": "2026-09-26T07:35:33.637Z",
+    "finishedAt": "2026-09-26T07:35:33.638Z",
+    "bobTaskId": "fake-run-20260926073526-aab88e-b"
+  },
+  "diff": {
+    "filesChanged": 1,
+    "insertions": 6,
+    "deletions": 2,
+    "files": [
+      {
+        "path": "src/app.ts",
+        "insertions": 6,
+        "deletions": 2
+      }
+    ],
+    "dependencyManifestChanged": false,
+    "configFilesTouched": []
+  },
+  "verification": {
+    "regressionIntact": true,
+    "regression": {
+      "name": "regression",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 146,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/b/logs/regression.log",
+      "command": {
+        "command": "node",
+        "args": [
+          "--test",
+          "--test-reporter=tap",
+          "test/refresh-expired.test.ts"
+        ]
+      },
+      "summary": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0
+      }
+    },
+    "tests": {
+      "name": "test",
+      "passed": false,
+      "exitCode": 1,
+      "durationMs": 582,
+      "timedOut": false,
+      "failures": [
+        "test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error",
+        "test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+      ],
+      "logPath": "candidates/b/logs/test.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "test"
+        ]
+      },
+      "summary": {
+        "tests": 13,
+        "pass": 11,
+        "fail": 2
+      }
+    },
+    "typecheck": {
+      "name": "typecheck",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 1380,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/b/logs/typecheck.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "typecheck"
+        ]
+      }
+    },
+    "lint": {
+      "name": "lint",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 1005,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/b/logs/lint.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "lint"
+        ]
+      }
+    },
+    "build": {
+      "name": "build",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 1161,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "candidates/b/logs/build.log",
+      "command": {
+        "command": "pnpm",
+        "args": [
+          "run",
+          "build"
+        ]
+      }
+    },
+    "newFailures": [
+      "test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error",
+      "test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+    ],
+    "baselineFailures": [],
+    "preservedFailures": [],
+    "diff": {
+      "filesChanged": 1,
+      "insertions": 6,
+      "deletions": 2,
+      "files": [
+        {
+          "path": "src/app.ts",
+          "insertions": 6,
+          "deletions": 2
+        }
+      ],
+      "dependencyManifestChanged": false,
+      "configFilesTouched": []
+    },
+    "hardGatePassed": false,
+    "rejectionReasons": [
+      "Introduced new test failures (2): test/account-policy.test.ts > refresh during a token-store outage returns 503, not an auth error; test/account-policy.test.ts > refresh for a disabled account returns 403 account_disabled"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+$ node --test --test-reporter=tap test/refresh-expired.test.ts
+# exit=1 signal=null timedOut=false durationMs=147
+--- stdout ---
+TAP version 13
+# Subtest: expired refresh token returns 401, not 500
+not ok 1 - expired refresh token returns 401, not 500
+  ---
+  duration_ms: 1.66525
+  type: 'test'
+  location: '<local>/.patchbench/worktrees/run-20260926073526-aab88e/reproduction/test/refresh-expired.test.ts:5:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    expected 401, received 500
+    
+    500 !== 401
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 401
+  actual: 500
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file://<local>/.patchbench/worktrees/run-20260926073526-aab88e/reproduction/test/refresh-expired.test.ts:7:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 0
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 105.925541
+
+--- stderr ---
+

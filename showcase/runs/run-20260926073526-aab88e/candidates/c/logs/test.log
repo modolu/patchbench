@@ -1,0 +1,95 @@
+$ pnpm run test
+# exit=0 signal=null timedOut=false durationMs=514
+--- stdout ---
+TAP version 13
+# Subtest: refresh for a disabled account returns 403 account_disabled
+ok 1 - refresh for a disabled account returns 403 account_disabled
+  ---
+  duration_ms: 1.348208
+  type: 'test'
+  ...
+# Subtest: refresh during a token-store outage returns 503, not an auth error
+ok 2 - refresh during a token-store outage returns 503, not an auth error
+  ---
+  duration_ms: 0.142
+  type: 'test'
+  ...
+# Subtest: unexpected errors return an opaque 500
+ok 3 - unexpected errors return an opaque 500
+  ---
+  duration_ms: 0.135917
+  type: 'test'
+  ...
+# Subtest: login with valid credentials returns a session
+ok 4 - login with valid credentials returns a session
+  ---
+  duration_ms: 0.993
+  type: 'test'
+  ...
+# Subtest: login with a wrong password returns 401 invalid_credentials
+ok 5 - login with a wrong password returns 401 invalid_credentials
+  ---
+  duration_ms: 0.618459
+  type: 'test'
+  ...
+# Subtest: login with missing fields returns 400 invalid_request
+ok 6 - login with missing fields returns 400 invalid_request
+  ---
+  duration_ms: 0.195125
+  type: 'test'
+  ...
+# Subtest: unknown routes return 404
+ok 7 - unknown routes return 404
+  ---
+  duration_ms: 0.096875
+  type: 'test'
+  ...
+# Subtest: expired refresh token returns 401, not 500
+ok 8 - expired refresh token returns 401, not 500
+  ---
+  duration_ms: 0.791958
+  type: 'test'
+  ...
+# Subtest: refresh with a valid token rotates the session
+ok 9 - refresh with a valid token rotates the session
+  ---
+  duration_ms: 0.990375
+  type: 'test'
+  ...
+# Subtest: a rotated refresh token cannot be reused
+ok 10 - a rotated refresh token cannot be reused
+  ---
+  duration_ms: 0.621167
+  type: 'test'
+  ...
+# Subtest: unknown refresh token returns 401 invalid_token
+ok 11 - unknown refresh token returns 401 invalid_token
+  ---
+  duration_ms: 0.191417
+  type: 'test'
+  ...
+# Subtest: revoked refresh token returns 401 invalid_token
+ok 12 - revoked refresh token returns 401 invalid_token
+  ---
+  duration_ms: 0.102042
+  type: 'test'
+  ...
+# Subtest: missing refreshToken returns 400 invalid_request
+ok 13 - missing refreshToken returns 400 invalid_request
+  ---
+  duration_ms: 0.193292
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 116.080958
+
+--- stderr ---
+$ node --test "test/**/*.test.ts"
+
