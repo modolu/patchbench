@@ -119,6 +119,12 @@ describe("deterministic benchmark end-to-end (dirty primary)", () => {
     expect(run.metrics.candidatesRejected).toBe(1);
   });
 
+  it("persists each candidate's implementation diff (frozen regression excluded) for review", async () => {
+    const patch = await readFile(path.join(ctx.store.runDir(RUN), "candidates", "b", "diff.patch"), "utf8");
+    expect(patch).toContain("diff --git a/src/app.ts b/src/app.ts");
+    expect(patch).not.toContain(TEST_FILE);
+  });
+
   it("runs baseline checks in a clean detached worktree, unaffected by the dirty primary", async () => {
     const baseline = run.baseline!;
     expect(baseline.commitSha).toBe(ctx.sha);

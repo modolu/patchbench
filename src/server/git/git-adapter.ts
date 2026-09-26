@@ -125,6 +125,15 @@ export class GitAdapter {
     return r.ok ? ok(parseNumstat(r.value)) : r;
   }
 
+  /**
+   * Unified diff of the working tree against `base` (tracked + intent-to-add
+   * files), excluding `excludePaths`. Output is runner-redacted and bounded.
+   */
+  async diffPatch(cwd: string, base: string, excludePaths: readonly string[] = []): Promise<Result<string, PatchBenchError>> {
+    if (!SHA.test(base)) return err(pbError("COMMAND_FAILED", "Diff base must be a full commit SHA."));
+    return this.gitOk(cwd, ["diff", "--no-color", "--no-ext-diff", "--no-renames", base, "--", ".", ...excludePaths.map((p) => `:(exclude,literal)${p}`)]);
+  }
+
   /** Every tracked change and untracked file (not ignored), one entry per path. */
   async statusEntries(cwd: string): Promise<Result<StatusEntry[], PatchBenchError>> {
     const r = await this.gitOk(cwd, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--no-renames"]);

@@ -115,6 +115,9 @@ export async function verifyCandidate(
   const numstat = staged.ok ? await git.diffNumstat(wt, run.repository.commitSha) : staged;
   const diff = numstat.ok ? summarizeDiff(numstat.value, frozenPaths) : candidate.diff;
   if (!diff) return err(pbError("COMMAND_FAILED", "Could not compute the candidate diff.", { detail: numstat.ok ? "" : numstat.error.detail }));
+  // Review copy of the implementation diff (frozen regression excluded) for the UI.
+  const patch = staged.ok ? await git.diffPatch(wt, run.repository.commitSha, frozenPaths) : staged;
+  if (patch.ok) await writeFileAtomic(path.join(dir, "diff.patch"), patch.value);
 
   const rejectionReasons = hardGateReasons({ regressionIntact, regression, newFailures, checks, policy });
   const verification: VerificationResult = {
