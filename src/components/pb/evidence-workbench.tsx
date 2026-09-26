@@ -137,7 +137,10 @@ export function EvidenceWorkbench(props: WorkbenchProps) {
                       </button>
                       {rejected && c.rejectionReasons.length > 0 && (
                         <button type="button" className="why" onClick={() => whyRejected(c.id)} data-testid={`why-${c.id}`}>
-                          Why rejected? {c.rejectionReasons.map(conciseReason).join(" · ")}
+                          <span className="why-q">Why rejected?</span> <span className="why-r">{c.rejectionReasons.map(conciseReason).join(" · ")}</span>
+                          <span className="why-arrow" aria-hidden>
+                            ↓
+                          </span>
                         </button>
                       )}
                     </th>
