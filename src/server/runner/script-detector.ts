@@ -29,7 +29,7 @@ export interface ScriptDetection {
 export async function detectScripts(repoRoot: string): Promise<ScriptDetection | null> {
   let pkg: z.infer<typeof PackageJsonSchema>;
   try {
-    const parsed = PackageJsonSchema.safeParse(JSON.parse(await readFile(path.join(repoRoot, "package.json"), "utf8")));
+    const parsed = PackageJsonSchema.safeParse(JSON.parse(await readFile(path.join(/*turbopackIgnore: true*/ repoRoot, "package.json"), "utf8")));
     if (!parsed.success) return null;
     pkg = parsed.data;
   } catch {
@@ -42,7 +42,7 @@ export async function detectScripts(repoRoot: string): Promise<ScriptDetection |
     packageManager = declared;
   } else {
     for (const [file, pm] of LOCKFILES) {
-      if (await exists(path.join(repoRoot, file))) {
+      if (await exists(path.join(/*turbopackIgnore: true*/ repoRoot, file))) {
         packageManager = pm;
         break;
       }
