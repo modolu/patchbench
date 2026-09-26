@@ -11,7 +11,7 @@ pnpm fixture:prepare   # → .patchbench/fixture-repos/auth-expiry-bug
 
 Re-running the command is the **reset**: it replaces only that directory.
 
-**Known baseline SHA:** `dc1762cc68af9e14586def7887699f074de48784`
+**Known baseline SHA:** `ad6b83d8a2b68a9220a8374cb5e24202edac07cd`
 (changes whenever any file under `fixtures/auth-expiry-bug/` changes; update this line).
 
 ### Hidden explanation (Shipyard only — never pass to Bob)
