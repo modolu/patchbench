@@ -185,8 +185,8 @@ export async function runReproductionGate(
   await store.appendEvent(runId, { type: "reproduction.started", data: { baseSha: run.repository.commitSha, adapter: bob.kind } });
   if (signal?.aborted) return cancelled();
 
-  const generated = await bob.generateReproduction({ runId, workspace: input.workspace, repository: run.repository, issue: run.issue });
-  if (!generated.ok) return failed(generated.error);
+  const generated = await bob.generateReproduction({ runId, workspace: input.workspace, repository: run.repository, issue: run.issue, signal });
+  if (!generated.ok) return generated.error.code === "COMMAND_CANCELLED" ? cancelled() : failed(generated.error);
   const proposal = generated.value;
   await writeFileExclusive(path.join(dir, "proposal.json"), `${JSON.stringify(proposal, null, 2)}\n`);
   await store.appendEvent(runId, { type: "reproduction.proposal_received", data: { testFiles: proposal.testFiles } });

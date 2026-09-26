@@ -28,6 +28,31 @@ export const ReproductionProposalSchema = z.object({
 });
 export type ReproductionProposal = z.infer<typeof ReproductionProposalSchema>;
 
+/** Reserved workspace-relative path Bob writes its structured result to in a manual IDE hand-off. */
+export const REPRODUCTION_RESULT_PATH = ".patchbench-handoff/reproduction-result.json";
+
+/**
+ * What a manual (Bob IDE) reproduction task writes to REPRODUCTION_RESULT_PATH.
+ * Strict: unknown keys, missing fields, or oversized text are rejected, never coerced.
+ */
+export const ReproductionHandoffResultSchema = z.discriminatedUnion("status", [
+  z.strictObject({
+    schemaVersion: z.literal(1),
+    status: z.literal("completed"),
+    testFiles: z.array(RelativePath).min(1).max(5),
+    expectedFailure: z.string().trim().min(1).max(200),
+    /** Informational only; never executed. */
+    proposedCommand: z.string().max(500).optional(),
+    summary: z.string().max(2000),
+  }),
+  z.strictObject({
+    schemaVersion: z.literal(1),
+    status: z.literal("blocked"),
+    summary: z.string().min(1).max(2000),
+  }),
+]);
+export type ReproductionHandoffResult = z.infer<typeof ReproductionHandoffResultSchema>;
+
 /** 2–3 materially different approaches; no implementation. */
 export const StrategiesSchema = z.array(CandidateStrategySchema).min(2).max(3);
 

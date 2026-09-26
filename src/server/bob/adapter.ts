@@ -10,6 +10,8 @@ export interface ReproductionInput {
   workspace: string;
   repository: RepositorySnapshot;
   issue: IssueSpec;
+  /** Aborts a long-running (e.g. manual hand-off) generation. */
+  signal?: AbortSignal;
 }
 
 export interface StrategyInput {
