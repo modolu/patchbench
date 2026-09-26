@@ -12,11 +12,13 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  // Production server on its own port (run `pnpm build` first) so a developer's
+  // `next dev` on :3000 is never disturbed. Showcase mode renders the committed
+  // captured run and disables execution; never spends Bobcoins.
   webServer: {
-    command: `pnpm dev --port ${PORT}`,
-    url: `http://127.0.0.1:${PORT}`,
-    reuseExistingServer: !process.env.CI,
-    // E2E always runs against the fake Bob adapter; never spend Bobcoins here.
-    env: { PATCHBENCH_BOB_ADAPTER: "fake" },
+    command: `pnpm exec next start --port ${PORT}`,
+    url: `http://127.0.0.1:${PORT}/new`,
+    reuseExistingServer: false,
+    env: { PATCHBENCH_MODE: "showcase", PATCHBENCH_BOB_ADAPTER: "fake" },
   },
 });
