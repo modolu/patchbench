@@ -1,0 +1,8 @@
+{
+  "testFiles": [
+    "test/refresh-expired.test.ts"
+  ],
+  "command": "node --test --test-reporter=tap test/refresh-expired.test.ts",
+  "expectedFailure": "Expected HTTP 401 for an expired refresh token but got HTTP 500 (body: {\"error\":\"internal_error\"}). The server is returning 500 internal_error instead of 401.",
+  "notes": "Asserts that POST /auth/refresh with an expired refresh token returns HTTP 401, not 500. On the current code, TokenExpiredError is not handled in toErrorResponse() and falls through to the generic 500 branch."
+}

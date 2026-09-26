@@ -1,0 +1,18 @@
+diff --git a/test/refresh-expired.test.ts b/test/refresh-expired.test.ts
+new file mode 100644
+--- /dev/null
++++ b/test/refresh-expired.test.ts
+@@ -0,0 +1,13 @@
++import assert from "node:assert/strict";
++import { test } from "node:test";
++import { setup } from "./harness.ts";
++
++test("expired refresh token returns 401 token_expired, not 500 internal_error", () => {
++  const { post } = setup();
++  const res = post("/auth/refresh", { refreshToken: [REDACTED] });
++  assert.equal(
++    res.status,
++    401,
++    `Expected HTTP 401 for an expired refresh token but got HTTP ${res.status} (body: ${JSON.stringify(res.body)}). The server is returning 500 internal_error instead of 401.`,
++  );
++});

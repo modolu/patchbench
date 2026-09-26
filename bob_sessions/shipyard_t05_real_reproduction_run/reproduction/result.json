@@ -1,0 +1,33 @@
+{
+  "outcome": "REPRODUCED",
+  "testFiles": [
+    "test/refresh-expired.test.ts"
+  ],
+  "expectedFailure": "Expected HTTP 401 for an expired refresh token but got HTTP 500 (body: {\"error\":\"internal_error\"}). The server is returning 500 internal_error instead of 401.",
+  "command": {
+    "command": "node",
+    "args": [
+      "--test",
+      "--test-reporter=tap",
+      "test/refresh-expired.test.ts"
+    ]
+  },
+  "baselineCheck": {
+    "name": "regression",
+    "passed": false,
+    "exitCode": 1,
+    "durationMs": 160,
+    "timedOut": false,
+    "failures": [
+      "expired refresh token returns 401 token_expired, not 500 internal_error"
+    ],
+    "logPath": "reproduction/logs/baseline.log"
+  },
+  "frozenPatchSha256": "7b3f9bba9d03b40cbacf80ba409d150421ce84f83571b08c74e32d7bc618d773",
+  "frozenFiles": [
+    {
+      "path": "test/refresh-expired.test.ts",
+      "sha256": "3b5c2cfab4a0eb35bae0111f535382d1774709b90cde08798ff1a2690fbe90c6"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "commitSha": "ad6b83d8a2b68a9220a8374cb5e24202edac07cd",
+  "checks": [
+    {
+      "name": "test",
+      "passed": true,
+      "exitCode": 0,
+      "durationMs": 169,
+      "timedOut": false,
+      "failures": [],
+      "logPath": "baseline/logs/test.log",
+      "command": {
+        "command": "node",
+        "args": [
+          "--test",
+          "--test-reporter=tap",
+          "test/**/*.test.ts"
+        ]
+      },
+      "summary": {
+        "tests": 12,
+        "pass": 12,
+        "fail": 0
+      }
+    }
+  ],
+  "failures": [],
+  "durationMs": 215
+}

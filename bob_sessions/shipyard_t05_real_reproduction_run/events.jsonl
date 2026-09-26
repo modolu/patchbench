@@ -1,0 +1,12 @@
+{"seq":1,"runId":"run-20260926064335-0a4172","type":"run.created","at":"2026-09-26T06:43:35.616Z","data":{"status":"CREATED"}}
+{"seq":2,"runId":"run-20260926064335-0a4172","type":"run.status_changed","at":"2026-09-26T06:43:35.617Z","data":{"from":"CREATED","to":"BASELINING"}}
+{"seq":3,"runId":"run-20260926064335-0a4172","type":"baseline.started","at":"2026-09-26T06:43:35.661Z","data":{"commitSha":"ad6b83d8a2b68a9220a8374cb5e24202edac07cd","checks":["test"],"commands":["node --test --test-reporter=tap test/**/*.test.ts"]}}
+{"seq":4,"runId":"run-20260926064335-0a4172","type":"baseline.check_completed","at":"2026-09-26T06:43:35.834Z","data":{"check":"test","passed":true,"exitCode":0,"durationMs":169,"failureCount":0}}
+{"seq":5,"runId":"run-20260926064335-0a4172","type":"baseline.completed","at":"2026-09-26T06:43:35.837Z","data":{"passed":["test"],"failed":[],"failureCount":0}}
+{"seq":6,"runId":"run-20260926064335-0a4172","type":"run.status_changed","at":"2026-09-26T06:43:35.838Z","data":{"from":"BASELINING","to":"REPRODUCING"}}
+{"seq":7,"runId":"run-20260926064335-0a4172","type":"reproduction.started","at":"2026-09-26T06:43:35.908Z","data":{"baseSha":"ad6b83d8a2b68a9220a8374cb5e24202edac07cd","adapter":"manual"}}
+{"seq":8,"runId":"run-20260926064335-0a4172","type":"reproduction.proposal_received","at":"2026-09-26T06:53:38.519Z","data":{"testFiles":["test/refresh-expired.test.ts"]}}
+{"seq":9,"runId":"run-20260926064335-0a4172","type":"reproduction.command.completed","at":"2026-09-26T06:53:38.713Z","data":{"exitCode":1,"timedOut":false,"durationMs":160,"tests":1,"fail":1,"failingTests":["expired refresh token returns 401 token_expired, not 500 internal_error"]}}
+{"seq":10,"runId":"run-20260926064335-0a4172","type":"reproduction.frozen","at":"2026-09-26T06:53:38.732Z","data":{"sha256":"7b3f9bba9d03b40cbacf80ba409d150421ce84f83571b08c74e32d7bc618d773","bytes":699,"files":[{"path":"test/refresh-expired.test.ts","sha256":"3b5c2cfab4a0eb35bae0111f535382d1774709b90cde08798ff1a2690fbe90c6"}]}}
+{"seq":11,"runId":"run-20260926064335-0a4172","type":"reproduction.confirmed","at":"2026-09-26T06:53:38.748Z","data":{"testFiles":["test/refresh-expired.test.ts"],"sha256":"7b3f9bba9d03b40cbacf80ba409d150421ce84f83571b08c74e32d7bc618d773","failingTests":["expired refresh token returns 401 token_expired, not 500 internal_error"]}}
+{"seq":12,"runId":"run-20260926064335-0a4172","type":"run.status_changed","at":"2026-09-26T06:53:38.749Z","data":{"from":"REPRODUCING","to":"STRATEGIZING"}}

@@ -1,0 +1,142 @@
+{
+  "id": "run-20260926064335-0a4172",
+  "createdAt": "2026-09-26T06:43:35.607Z",
+  "updatedAt": "2026-09-26T06:53:38.749Z",
+  "repository": {
+    "root": "<LIVE_ROOT>/repo",
+    "branch": "main",
+    "commitSha": "ad6b83d8a2b68a9220a8374cb5e24202edac07cd",
+    "isDirty": false,
+    "packageManager": "pnpm",
+    "detectedScripts": {
+      "test": "node --test \"test/**/*.test.ts\""
+    }
+  },
+  "issue": {
+    "title": "Expired refresh token returns HTTP 500 instead of 401",
+    "description": "POST /auth/refresh with an expired refresh token responds with HTTP 500 { error: \"internal_error\" }. Clients treat 5xx as an outage and retry instead of sending the user back to log in.",
+    "expectedBehavior": "POST /auth/refresh with an expired refresh token responds with HTTP 401, as documented in the README API contract.",
+    "actualBehavior": "HTTP 500 internal_error."
+  },
+  "policy": {
+    "candidateCount": 3,
+    "verificationCommands": [
+      {
+        "name": "test",
+        "command": "node",
+        "args": [
+          "--test",
+          "--test-reporter=tap",
+          "test/**/*.test.ts"
+        ],
+        "required": true
+      }
+    ],
+    "regressionCommand": {
+      "command": "node",
+      "args": [
+        "--test",
+        "--test-reporter=tap"
+      ]
+    },
+    "commandTimeoutMs": 120000,
+    "maxOutputBytes": 262144,
+    "envAllowList": [
+      "PATH",
+      "HOME",
+      "LANG",
+      "LC_ALL",
+      "TMPDIR",
+      "TERM",
+      "CI"
+    ],
+    "bob": {
+      "maxCostPerTask": 1,
+      "maxTurnsPerTask": 20
+    },
+    "excludePaths": [
+      ".git",
+      "node_modules",
+      ".next",
+      "dist",
+      "build",
+      ".env",
+      ".env.*"
+    ],
+    "requireBuild": false,
+    "requireTypecheck": false
+  },
+  "status": "STRATEGIZING",
+  "baseline": {
+    "commitSha": "ad6b83d8a2b68a9220a8374cb5e24202edac07cd",
+    "checks": [
+      {
+        "name": "test",
+        "passed": true,
+        "exitCode": 0,
+        "durationMs": 169,
+        "timedOut": false,
+        "failures": [],
+        "logPath": "baseline/logs/test.log",
+        "command": {
+          "command": "node",
+          "args": [
+            "--test",
+            "--test-reporter=tap",
+            "test/**/*.test.ts"
+          ]
+        },
+        "summary": {
+          "tests": 12,
+          "pass": 12,
+          "fail": 0
+        }
+      }
+    ],
+    "failures": [],
+    "durationMs": 215
+  },
+  "reproduction": {
+    "outcome": "REPRODUCED",
+    "testFiles": [
+      "test/refresh-expired.test.ts"
+    ],
+    "expectedFailure": "Expected HTTP 401 for an expired refresh token but got HTTP 500 (body: {\"error\":\"internal_error\"}). The server is returning 500 internal_error instead of 401.",
+    "command": {
+      "command": "node",
+      "args": [
+        "--test",
+        "--test-reporter=tap",
+        "test/refresh-expired.test.ts"
+      ]
+    },
+    "baselineCheck": {
+      "name": "regression",
+      "passed": false,
+      "exitCode": 1,
+      "durationMs": 160,
+      "timedOut": false,
+      "failures": [
+        "expired refresh token returns 401 token_expired, not 500 internal_error"
+      ],
+      "logPath": "reproduction/logs/baseline.log"
+    },
+    "frozenPatchSha256": "7b3f9bba9d03b40cbacf80ba409d150421ce84f83571b08c74e32d7bc618d773",
+    "frozenFiles": [
+      {
+        "path": "test/refresh-expired.test.ts",
+        "sha256": "3b5c2cfab4a0eb35bae0111f535382d1774709b90cde08798ff1a2690fbe90c6"
+      }
+    ]
+  },
+  "strategies": [],
+  "candidates": [],
+  "metrics": {
+    "stageDurationsMs": {
+      "baseline": 215,
+      "reproduction": 602864
+    },
+    "commandsExecuted": 2,
+    "candidatesRejected": 0
+  }
+}

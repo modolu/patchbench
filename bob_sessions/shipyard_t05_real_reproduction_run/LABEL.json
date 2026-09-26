@@ -1,0 +1,14 @@
+{
+  "label": "REAL IBM Bob run (manual Bob IDE hand-off) — not a FakeBob fixture",
+  "task": "PatchBench T05 — Real Reproduction",
+  "runId": "run-20260926064335-0a4172",
+  "integration": "manual",
+  "bobInvocations": 1,
+  "finalStatus": "STRATEGIZING",
+  "outcome": "REPRODUCED",
+  "statusPath": [
+    "BASELINING",
+    "REPRODUCING",
+    "STRATEGIZING"
+  ]
+}
